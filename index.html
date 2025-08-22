@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lanche da Si - Os melhores lanches da cidade</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/melhorias-visuais.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Indicador de progresso do scroll -->
+    <div class="scroll-indicator" id="scrollIndicator"></div>
+
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#menu" class="nav-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Cardápio</span>
+                </a>
+                <a href="#contato" class="nav-link">
+                    <i class="fas fa-phone"></i>
+                    <span>Contato</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-logo">
+                    <img src="assets/logo-lanche-da-si.png" alt="Logo Lanche da Si" class="hero-logo-img">
+                    <!-- <h1 class="hero-brand">Lanche da Si</h1> -->
+                </div>
+                <p class="hero-subtitle">Faça seu pedido online de forma simples e rápida</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu" class="menu-section section-animate">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="gradient-text">Nosso Cardápio</h2>
+                <p class="section-subtitle">Escolha seus pratos favoritos e monte seu pedido</p>
+            </div>
+
+            <div class="menu-categories">
+                <button class="category-btn active" data-category="todos">
+                    <i class="fas fa-th"></i>
+                    <span>Todos os Itens</span>
+                </button>
+                <button class="category-btn" data-category="combos">
+                    <i class="fas fa-box"></i>
+                    <span>Combos</span>
+                </button>
+                <button class="category-btn" data-category="sanduiches">
+                    <i class="fas fa-burger"></i>
+                    <span>Sanduíches</span>
+                </button>
+                <button class="category-btn" data-category="kikao">
+                    <i class="fas fa-hotdog"></i>
+                    <span>Kikão</span>
+                </button>
+                <button class="category-btn" data-category="pratos">
+                    <i class="fas fa-utensils"></i>
+                    <span>Pratos</span>
+                </button>
+                <button class="category-btn" data-category="porcoes">
+                    <i class="fas fa-pizza-slice"></i>
+                    <span>Porções</span>
+                </button>
+                <button class="category-btn" data-category="bebidas">
+                    <i class="fas fa-wine-glass"></i>
+                    <span>Bebidas</span>
+                </button>
+            </div>
+
+            <div class="menu-grid" id="menuGrid">
+            </div>
+        </div>
+    </section>
+
+
+    <section class="cart-section" id="cartSection">
+        <div class="container">
+            <div class="cart-header">
+                <h3>
+                    <i class="fas fa-shopping-cart"></i>
+                    Seu Pedido
+                </h3>
+                <button class="btn-clear" id="clearCart">
+                    <i class="fas fa-trash"></i>
+                    Limpar
+                </button>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Seu carrinho está vazio</p>
+                    <p class="empty-cart-subtitle">Adicione itens do cardápio para começar</p>
+                </div>
+            </div>
+            <div class="cart-total">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">R$ 0,00</span>
+                </div>
+                <div class="total-row">
+                    <span>Taxa de entrega:</span>
+                    <span id="deliveryFee">R$ 0,00</span>
+                </div>
+                <div class="total-row total-final">
+                    <span>Total:</span>
+                    <span id="total">R$ 0,00</span>
+                </div>
+            </div>
+            <div class="order-observations">
+                <label for="orderObservations" class="observations-label">
+                    <i class="fas fa-comment"></i>
+                    Observações (opcional)
+                </label>
+                <textarea id="orderObservations" class="observations-textarea"
+                    placeholder="Ex: Sem cebola, ponto da carne, observações sobre entrega..."
+                    maxlength="300"></textarea>
+                <div class="char-counter">
+                    <span id="charCount">0</span>/300 caracteres
+                </div>
+            </div>
+            <div class="cart-actions">
+                <button class="btn-whatsapp" id="orderWhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>Finalizar Pedido no WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="contato" class="contact-section section-animate">
+        <div class="container">
+            <h2 class="gradient-text">Entre em Contato</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h4>Telefone</h4>
+                        <p>+55 (92) 99352-5884</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <h4>Endereço</h4>
+                        <p>Rua Itororo, 22, Beco Esperança - Alvorada, Manaus - AM</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <h4>Horário de Funcionamento</h4>
+                        <p>Terça a Domingo: 18h às 23h</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Lanche da Si. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Cart Toggle Button -->
+    <button class="cart-toggle" id="cartToggle">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+        <span class="cart-toggle-text">Carrinho</span>
+    </button>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/5592993525884" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+        <span class="whatsapp-text">Fale Conosco</span>
+    </a>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
