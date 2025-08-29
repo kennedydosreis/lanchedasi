@@ -185,8 +185,8 @@
     </button>
 
     {#if isOpen}
-        <div 
-            class="cart-overlay" 
+        <div
+            class="cart-overlay"
             on:click={toggleCart}
             on:keydown={(e) => e.key === 'Escape' && toggleCart()}
             role="button"

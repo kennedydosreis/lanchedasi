@@ -1,14 +1,12 @@
 <script>
-    import { base, assets } from '$app/paths';
+    import { base } from '$app/paths';
     
     export let title = 'Lanche da Si - Os melhores lanches da cidade';
     export let description = 'Faça seu pedido online de forma simples e rápida. Os melhores lanches da cidade com entrega rápida.';
-    export let image = `${assets}/logo-lanche-da-si.png`;
+    export let image = `${base}/logo-lanche-da-si.png`;
     export let url = '';
     export let type = 'website';
-</script>
-
-<svelte:head>
+</script><svelte:head>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="keywords" content="lanche, hamburger, delivery, comida, pedido online, lanchonete" />
