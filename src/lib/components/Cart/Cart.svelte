@@ -459,11 +459,13 @@
         right: 0;
         width: 400px;
         height: 100vh;
+        max-height: 100vh;
         background: var(--white);
         z-index: 999;
         display: flex;
         flex-direction: column;
         box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
     }
 
     .cart-header {
@@ -488,16 +490,27 @@
         color: var(--gray-500);
         cursor: pointer;
         padding: var(--spacing-2);
+        min-width: 44px; /* Área mínima de toque recomendada */
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s ease;
     }
 
     .close-btn:hover {
         color: var(--gray-700);
+        background: var(--gray-100);
     }
 
     .cart-content {
         flex: 1;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
+        height: calc(100vh - 200px); /* Reserva espaço fixo para header e footer */
+        min-height: 300px; /* Altura mínima para garantir usabilidade */
     }
 
     .empty-cart {
@@ -518,12 +531,19 @@
         flex: 1;
         overflow-y: auto;
         padding: var(--spacing-4);
+        /* Melhora o scroll em dispositivos móveis */
+        -webkit-overflow-scrolling: touch;
+        /* Previne o bounce no iOS */
+        overscroll-behavior: contain;
     }
 
     .order-details {
         padding: var(--spacing-6);
         border-top: 1px solid var(--gray-200);
         background: var(--gray-50);
+        flex-shrink: 0;
+        max-height: 300px;
+        overflow-y: auto;
     }
 
     .form-group {
@@ -920,6 +940,8 @@
         padding: var(--spacing-6);
         border-top: 1px solid var(--gray-200);
         background: var(--gray-50);
+        flex-shrink: 0;
+        min-height: 120px;
     }
 
     .order-btn {
@@ -951,11 +973,223 @@
     @media (max-width: 768px) {
         .cart-panel {
             width: 100%;
+            height: 100vh;
+            max-height: 100vh;
         }
 
         .cart-container {
             bottom: var(--spacing-4);
             right: var(--spacing-4);
+        }
+
+        .cart-toggle {
+            width: 56px;
+            height: 56px;
+            font-size: var(--font-size-lg);
+        }
+
+        .cart-badge {
+            width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+            top: -6px;
+            right: -6px;
+        }
+
+        .cart-content {
+            height: calc(100vh - 80px); /* Header é ~80px */
+            overflow: hidden;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
+            /* Scroll mais suave em mobile */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .order-details {
+            flex-shrink: 0;
+            max-height: none;
+            padding: var(--spacing-4);
+            border-top: 1px solid var(--gray-200);
+            background: var(--gray-50);
+        }
+
+        .cart-footer {
+            position: sticky;
+            bottom: 0;
+            background: var(--white);
+            border-top: 2px solid var(--gray-200);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            padding: var(--spacing-4);
+            padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom));
+            flex-shrink: 0;
+        }
+
+        .order-btn {
+            font-size: var(--font-size-base);
+            padding: var(--spacing-4);
+            min-height: 52px;
+            font-weight: 700;
+        }
+
+        .order-summary {
+            margin-bottom: var(--spacing-3);
+            padding: var(--spacing-3);
+        }
+
+        .summary-line {
+            padding: var(--spacing-2) 0;
+        }
+
+        /* Melhor layout para botões de localização */
+        .location-buttons {
+            gap: var(--spacing-2);
+        }
+
+        .location-btn, .manual-btn {
+            padding: var(--spacing-4);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+        }
+
+        .manual-address-buttons {
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        .save-address-btn, .cancel-address-btn {
+            padding: var(--spacing-4);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Melhora o layout da informação de localização */
+        .location-display {
+            flex-direction: column;
+            align-items: stretch;
+            gap: var(--spacing-3);
+            padding: var(--spacing-4);
+        }
+
+        .location-info {
+            order: 1;
+        }
+
+        .location-actions {
+            order: 2;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            gap: var(--spacing-2);
+        }
+
+        .delivery-info {
+            gap: var(--spacing-2);
+        }
+
+        .accuracy {
+            font-size: var(--font-size-xs);
+        }
+
+        /* Para dispositivos muito pequenos */
+        @media (max-height: 600px) {
+            .cart-header {
+                padding: var(--spacing-3);
+            }
+
+            .cart-header h3 {
+                font-size: var(--font-size-xl);
+            }
+
+            .order-details {
+                padding: var(--spacing-3);
+            }
+
+            .cart-footer {
+                padding: var(--spacing-3);
+            }
+
+            .order-summary {
+                padding: var(--spacing-2);
+                margin-bottom: var(--spacing-2);
+            }
+        }
+
+        /* Para dispositivos extra pequenos */
+        @media (max-width: 480px) {
+            .cart-panel {
+                padding: 0;
+            }
+
+            .cart-header {
+                padding: var(--spacing-4) var(--spacing-4) var(--spacing-3);
+                position: sticky;
+                top: 0;
+                background: var(--white);
+                z-index: 20;
+                border-bottom: 2px solid var(--gray-100);
+            }
+
+            .cart-footer {
+                padding: var(--spacing-4) var(--spacing-4) calc(var(--spacing-4) + env(safe-area-inset-bottom));
+            }
+
+            .order-details {
+                padding: var(--spacing-3) var(--spacing-4);
+            }
+
+            .cart-items {
+                padding: var(--spacing-2) var(--spacing-4) var(--spacing-3);
+            }
+
+            .cart-toggle {
+                width: 52px;
+                height: 52px;
+                font-size: var(--font-size-base);
+            }
+
+            .form-group {
+                margin-bottom: var(--spacing-4);
+            }
+
+            textarea {
+                font-size: var(--font-size-base);
+                padding: var(--spacing-4);
+                border-radius: 12px;
+                border-width: 2px;
+            }
+
+            /* Melhora a usabilidade dos botões em telas pequenas */
+            .location-btn, .manual-btn, .save-address-btn, .cancel-address-btn {
+                min-height: 48px;
+                touch-action: manipulation;
+                border-radius: 12px;
+                font-weight: 600;
+            }
+
+            /* Melhora o layout dos campos de texto */
+            .form-group label {
+                font-size: var(--font-size-base);
+                font-weight: 700;
+                margin-bottom: var(--spacing-3);
+            }
+
+            /* Melhora a exibição das informações de entrega */
+            .delivery-note {
+                font-size: var(--font-size-sm);
+                padding: var(--spacing-4);
+                border-radius: 12px;
+                margin-top: var(--spacing-3);
+            }
+
+            .error-message {
+                padding: var(--spacing-4);
+                border-radius: 12px;
+                font-size: var(--font-size-sm);
+            }
         }
     }
 </style>
