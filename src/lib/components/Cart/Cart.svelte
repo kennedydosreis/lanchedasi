@@ -185,7 +185,14 @@
     </button>
 
     {#if isOpen}
-        <div class="cart-overlay" on:click={toggleCart}></div>
+        <div 
+            class="cart-overlay" 
+            on:click={toggleCart}
+            on:keydown={(e) => e.key === 'Escape' && toggleCart()}
+            role="button"
+            tabindex="0"
+            aria-label="Fechar carrinho"
+        ></div>
         <div class="cart-panel">
             <div class="cart-header">
                 <h3>Seu Pedido</h3>
@@ -219,8 +226,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Endereço para entrega:</label>
-                            <div class="location-section">
+                            <label for="delivery-address">Endereço para entrega:</label>
+                            <div class="location-section" id="delivery-address">
                                 {#if showManualAddress}
                                     <div class="manual-address-form">
                                         <label for="manual-address">
