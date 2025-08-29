@@ -1,4 +1,6 @@
 <script>
+    import { base } from '$app/paths';
+
     /** @type {HTMLDivElement} */
     let scrollIndicator;
     let isMobileMenuOpen = false;
@@ -45,12 +47,12 @@
             <div class="nav-brand">
                 <a href="#inicio" class="brand-logo-link">
                     <img
-                        src="/lanchedasi/logo-lanche-da-si.png"
+                        src="{base}/logo-lanche-da-si.png"
                         alt="Logo Lanche da Si"
                         class="brand-logo"
                         on:error={(e) => {
                             if (e.target instanceof HTMLImageElement) {
-                                e.target.src = "/lanchedasi/logo.svg";
+                                e.target.src = `${base}/logo.svg`;
                             }
                         }}
                     />
