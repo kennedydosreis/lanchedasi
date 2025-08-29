@@ -1,3 +1,4 @@
+
 // Dados do menu - Carregados do localStorage ou dados padrão
 let menuData = {};
 
@@ -22,7 +23,7 @@ function loadMenuData() {
                     id: 'combo-1',
                     name: 'Combo 1',
                     description: '1 X-Salada + 1 Batata Frita P + 1 Refrigerante (Magistral ou Regente) 350ml',
-                    price: 25.00,
+                    price: 20.00,
                     category: 'combos',
                     image: 'assets/produtos/combo-1.jpg'
                 },
