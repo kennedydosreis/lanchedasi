@@ -439,6 +439,14 @@ export const menuData = {
         },
         {
             id: 'prato-8',
+            name: 'Yakisoba Médio Misto (Carne e Frango)',
+            description: 'Macarrão com verduras e molho especial, acompanhado de carne e frango',
+            price: 35.00,
+            category: 'pratos',
+            image: '/assets/produtos/yakisoba-m-carne-frango.jpg'
+        },
+        {
+            id: 'prato-9',
             name: 'Yakisoba Médio Misto (Carne e Calabresa)',
             description: 'Macarrão com verduras e molho especial, acompanhado de carne e calabresa',
             price: 35.00,
@@ -446,7 +454,7 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-m-carne-calabresa.jpg'
         },
         {
-            id: 'prato-9',
+            id: 'prato-10',
             name: 'Yakisoba Médio Misto (Frango e Calabresa)',
             description: 'Macarrão com verduras e molho especial, acompanhado de frango e calabresa',
             price: 35.00,
@@ -454,7 +462,7 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-m-frango-calabresa.jpg'
         },
         {
-            id: 'prato-10',
+            id: 'prato-11',
             name: 'Yakisoba Médio Misto (Carne, Frango e Calabresa)',
             description: 'Macarrão com verduras e molho especial, acompanhado de carne, frango e calabresa',
             price: 40.00,
@@ -462,7 +470,7 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-m-completo.jpg'
         },
         {
-            id: 'prato-11',
+            id: 'prato-12',
             name: 'Yakisoba Grande de Carne',
             description: 'Macarrão com verduras e molho especial, acompanhado de carne',
             price: 40.00,
@@ -470,7 +478,7 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-g-carne.jpg'
         },
         {
-            id: 'prato-12',
+            id: 'prato-13',
             name: 'Yakisoba Grande de Frango',
             description: 'Macarrão com verduras e molho especial, acompanhado de frango',
             price: 40.00,
@@ -478,7 +486,15 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-g-frango.jpg'
         },
         {
-            id: 'prato-13',
+            id: 'prato-14',
+            name: 'Yakisoba Grande Misto (Carne e Frango)',
+            description: 'Macarrão com verduras e molho especial, acompanhado de carne e frango',
+            price: 45.00,
+            category: 'pratos',
+            image: '/assets/produtos/yakisoba-g-carne-frango.jpg'
+        },
+        {
+            id: 'prato-15',
             name: 'Yakisoba Grande Misto (Carne e Calabresa)',
             description: 'Macarrão com verduras e molho especial, acompanhado de carne e calabresa',
             price: 45.00,
@@ -486,7 +502,7 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-g-carne-calabresa.jpg'
         },
         {
-            id: 'prato-14',
+            id: 'prato-16',
             name: 'Yakisoba Grande Misto (Frango e Calabresa)',
             description: 'Macarrão com verduras e molho especial, acompanhado de frango e calabresa',
             price: 45.00,
@@ -494,14 +510,24 @@ export const menuData = {
             image: '/assets/produtos/yakisoba-g-frango-calabresa.jpg'
         },
         {
-            id: 'prato-15',
+            id: 'prato-17',
             name: 'Yakisoba Grande Misto (Carne, Frango e Calabresa)',
             description: 'Macarrão com verduras e molho especial, acompanhado de carne, frango e calabresa',
             price: 50.00,
             category: 'pratos',
             image: '/assets/produtos/yakisoba-g-completo.jpg'
         }
+    ],
+    sobremesas: [
+        {
+            id: 'sobremesa-1',
+            name: 'Salada de Frutas',
+            description: 'Mix de frutas frescas da estação',
+            price: 14.00,
+            category: 'sobremesas',
+            image: '/assets/produtos/salada-frutas.jpg'
+        }
     ]
 };
 
-export const MENU_VERSION = '6.0';
+export const MENU_VERSION = '6.2';
