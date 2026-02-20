@@ -27,12 +27,12 @@
             showLocationError = false;
             showManualAddress = false;
             const result = await orderInfo.getLocationAsync();
-            console.log('Localização obtida:', result);
+            import.meta.env.DEV && console.log('Localização obtida:', result);
 
             // Mostra informação sobre a precisão se disponível
             if (result.location && result.location.accuracy) {
                 const accuracy = Math.round(result.location.accuracy);
-                console.log(`Precisão da localização: ${accuracy} metros`);
+                import.meta.env.DEV && console.log(`Precisão da localização: ${accuracy} metros`);
 
                 if (accuracy > 200) {
                     showLocationError = true;
@@ -58,7 +58,7 @@
     }
 
     function toggleManualAddress() {
-        console.log('toggleManualAddress chamado', { showManualAddress, currentAddress: $orderInfo.address });
+        import.meta.env.DEV && console.log('toggleManualAddress chamado', { showManualAddress, currentAddress: $orderInfo.address });
         showManualAddress = !showManualAddress;
         showLocationError = false;
         if (!showManualAddress) {
@@ -68,12 +68,12 @@
             // Se há um endereço atual, usa como base para edição
             manualAddress = $orderInfo.address || '';
             recalculateDistance = false;
-            console.log('Endereço carregado para edição:', manualAddress);
+            import.meta.env.DEV && console.log('Endereço carregado para edição:', manualAddress);
         }
     }
 
     async function saveManualAddress() {
-        console.log('saveManualAddress chamado', {
+        import.meta.env.DEV && console.log('saveManualAddress chamado', {
             manualAddress: manualAddress.trim(),
             hasLocation: !!$orderInfo.location,
             recalculateDistance
@@ -85,28 +85,28 @@
 
                 // Se temos coordenadas GPS mas usuário quer recalcular OU se não temos coordenadas
                 if (!$orderInfo.location || recalculateDistance) {
-                    console.log('Fazendo geocoding para recalcular distância');
+                    import.meta.env.DEV && console.log('Fazendo geocoding para recalcular distância');
                     const result = await orderInfo.setAddressWithGeocode(manualAddress.trim());
 
                     if (result.distance !== null) {
-                        console.log('Geocoding bem-sucedido, nova distância:', result.distance, 'km');
-                        console.log('Nova taxa de entrega:', result.deliveryFee);
+                        import.meta.env.DEV && console.log('Geocoding bem-sucedido, nova distância:', result.distance, 'km');
+                        import.meta.env.DEV && console.log('Nova taxa de entrega:', result.deliveryFee);
                     } else {
-                        console.log('Geocoding falhou, endereço salvo sem cálculo de distância');
+                        import.meta.env.DEV && console.log('Geocoding falhou, endereço salvo sem cálculo de distância');
                     }
                 } else {
                     // Apenas atualiza o texto do endereço, mantendo coordenadas originais
-                    console.log('Atualizando apenas o texto do endereço, mantendo coordenadas GPS');
+                    import.meta.env.DEV && console.log('Atualizando apenas o texto do endereço, mantendo coordenadas GPS');
                     orderInfo.setAddress(manualAddress.trim());
                 }
 
                 showManualAddress = false;
                 manualAddress = '';
                 recalculateDistance = false;
-                console.log('Endereço salvo com sucesso');
+                import.meta.env.DEV && console.log('Endereço salvo com sucesso');
 
             } catch (error) {
-                console.error('Erro ao salvar endereço:', error);
+                import.meta.env.DEV && console.error('Erro ao salvar endereço:', error);
                 showLocationError = true;
                 locationErrorMessage = 'Erro ao processar endereço. Tente novamente.';
                 setTimeout(() => {

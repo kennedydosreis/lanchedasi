@@ -11,7 +11,7 @@ const config = {
 			strict: true
 		}),
 		paths: {
-			base: process.env.NODE_ENV === 'production' ? '/lanchedasi' : ''
+			base: process.env.PUBLIC_BASE_PATH || ''
 		},
 		prerender: {
 			entries: ['*'],

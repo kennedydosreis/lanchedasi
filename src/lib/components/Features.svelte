@@ -10,7 +10,7 @@
         try {
             showLocationError = false;
             const result = await orderInfo.getLocationAsync();
-            console.log('Localização obtida:', result);
+            import.meta.env.DEV && console.log('Localização obtida:', result);
         } catch (error) {
             showLocationError = true;
             locationErrorMessage = error.message;
