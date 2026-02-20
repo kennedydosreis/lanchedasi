@@ -66,7 +66,7 @@ function createOrderInfo() {
                         isLoadingLocation: false
                     }));
 
-                    console.log('Endereço geocodificado:', { address, coordinates, distance, deliveryFee });
+                    import.meta.env.DEV && console.log('Endereço geocodificado:', { address, coordinates, distance, deliveryFee });
                     return { success: true, distance, deliveryFee, canDeliver };
                 } else {
                     // Se não conseguiu coordenadas, salva só o endereço
@@ -80,11 +80,11 @@ function createOrderInfo() {
                         isLoadingLocation: false
                     }));
 
-                    console.log('Endereço salvo sem geocoding:', address);
+                    import.meta.env.DEV && console.log('Endereço salvo sem geocoding:', address);
                     return { success: true, distance: null, deliveryFee: 0, canDeliver: true };
                 }
             } catch (error) {
-                console.error('Erro no geocoding:', error);
+                import.meta.env.DEV && console.error('Erro no geocoding:', error);
                 // Em caso de erro, salva só o endereço
                 update(state => ({
                     ...state,
@@ -140,8 +140,8 @@ function createOrderInfo() {
                             accuracy: position.coords.accuracy
                         };
 
-                        console.log('Localização obtida:', location);
-                        console.log('Precisão:', position.coords.accuracy, 'metros');
+                        import.meta.env.DEV && console.log('Localização obtida:', location);
+                        import.meta.env.DEV && console.log('Precisão:', position.coords.accuracy, 'metros');
 
                         const distance = calculateDistance(STORE_LOCATION.lat, STORE_LOCATION.lng, location.latitude, location.longitude);
                         const deliveryFee = calculateDeliveryFee(distance);
@@ -149,7 +149,7 @@ function createOrderInfo() {
 
                         try {
                             const address = await reverseGeocode(location.latitude, location.longitude);
-                            console.log('Endereço encontrado:', address);
+                            import.meta.env.DEV && console.log('Endereço encontrado:', address);
                             update(state => ({
                                 ...state,
                                 location,
@@ -161,7 +161,7 @@ function createOrderInfo() {
                             }));
                             resolve({ location, address, distance, deliveryFee, canDeliver });
                         } catch (error) {
-                            console.error('Erro no geocoding:', error);
+                            import.meta.env.DEV && console.error('Erro no geocoding:', error);
                             const fallbackAddress = `Localização: ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
                             update(state => ({
                                 ...state,
@@ -286,13 +286,13 @@ async function reverseGeocode(lat, lng) {
 
                     // Se conseguiu montar um endereço específico, retorna
                     if (addressParts.length >= 2) {
-                        console.log('Endereço detalhado encontrado (Nominatim):', addressParts.join(', '));
+                        import.meta.env.DEV && console.log('Endereço detalhado encontrado (Nominatim):', addressParts.join(', '));
                         return addressParts.join(', ');
                     }
                 }
             }
         } catch (nominatimError) {
-            console.log('Erro no Nominatim:', nominatimError);
+            import.meta.env.DEV && console.log('Erro no Nominatim:', nominatimError);
         }
 
         // Tentativa 2: BigDataCloud
@@ -303,7 +303,7 @@ async function reverseGeocode(lat, lng) {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Dados BigDataCloud:', data);
+                import.meta.env.DEV && console.log('Dados BigDataCloud:', data);
 
                 const addressParts = [];
 
@@ -343,19 +343,19 @@ async function reverseGeocode(lat, lng) {
                 }
 
                 if (addressParts.length >= 2) {
-                    console.log('Endereço detalhado encontrado (BigDataCloud):', addressParts.join(', '));
+                    import.meta.env.DEV && console.log('Endereço detalhado encontrado (BigDataCloud):', addressParts.join(', '));
                     return addressParts.join(', ');
                 }
 
                 // Fallback para informações básicas
                 if (data.locality || data.city) {
                     const basicAddress = `${data.locality || data.city}, ${data.principalSubdivision || ''}, ${data.countryName || ''}`;
-                    console.log('Endereço básico encontrado:', basicAddress);
+                    import.meta.env.DEV && console.log('Endereço básico encontrado:', basicAddress);
                     return basicAddress.replace(', ,', ',').replace(/,$/, '');
                 }
             }
         } catch (bigDataError) {
-            console.log('Erro no BigDataCloud:', bigDataError);
+            import.meta.env.DEV && console.log('Erro no BigDataCloud:', bigDataError);
         }
 
         // Tentativa 3: ViaCEP reverso (para coordenadas no Brasil)
@@ -383,28 +383,28 @@ async function reverseGeocode(lat, lng) {
                     }
 
                     if (addressParts.length >= 2) {
-                        console.log('Endereço encontrado (ViaCEP):', addressParts.join(', '));
+                        import.meta.env.DEV && console.log('Endereço encontrado (ViaCEP):', addressParts.join(', '));
                         return addressParts.join(', ');
                     }
                 }
             }
         } catch (viaCepError) {
-            console.log('Erro no ViaCEP:', viaCepError);
+            import.meta.env.DEV && console.log('Erro no ViaCEP:', viaCepError);
         }
 
         // Se todas as tentativas falharam, retorna coordenadas
-        console.log('Todas as APIs falharam, retornando coordenadas');
+        import.meta.env.DEV && console.log('Todas as APIs falharam, retornando coordenadas');
         return `Localização: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
 
     } catch (error) {
-        console.error('Erro geral no geocoding:', error);
+        import.meta.env.DEV && console.error('Erro geral no geocoding:', error);
         return `Localização: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     }
 }
 
 async function geocodeAddress(address) {
     try {
-        console.log('Tentando geocoding para:', address);
+        import.meta.env.DEV && console.log('Tentando geocoding para:', address);
 
         // Tentativa 1: Nominatim (OpenStreetMap)
         try {
@@ -428,12 +428,12 @@ async function geocodeAddress(address) {
                         lng: parseFloat(result.lon)
                     };
 
-                    console.log('Geocoding bem-sucedido (Nominatim):', coordinates);
+                    import.meta.env.DEV && console.log('Geocoding bem-sucedido (Nominatim):', coordinates);
                     return coordinates;
                 }
             }
         } catch (nominatimError) {
-            console.log('Erro no Nominatim geocoding:', nominatimError);
+            import.meta.env.DEV && console.log('Erro no Nominatim geocoding:', nominatimError);
         }
 
         // Tentativa 2: ViaCEP para buscar CEP no endereço
@@ -471,7 +471,7 @@ async function geocodeAddress(address) {
                                     lng: parseFloat(result2.lon)
                                 };
 
-                                console.log('Geocoding bem-sucedido (ViaCEP + Nominatim):', coordinates2);
+                                import.meta.env.DEV && console.log('Geocoding bem-sucedido (ViaCEP + Nominatim):', coordinates2);
                                 return coordinates2;
                             }
                         }
@@ -479,15 +479,15 @@ async function geocodeAddress(address) {
                 }
             }
         } catch (viaCepError) {
-            console.log('Erro no ViaCEP geocoding:', viaCepError);
+            import.meta.env.DEV && console.log('Erro no ViaCEP geocoding:', viaCepError);
         }
 
         // Se nenhuma tentativa funcionou
-        console.log('Não foi possível fazer geocoding do endereço');
+        import.meta.env.DEV && console.log('Não foi possível fazer geocoding do endereço');
         return null;
 
     } catch (error) {
-        console.error('Erro geral no geocoding:', error);
+        import.meta.env.DEV && console.error('Erro geral no geocoding:', error);
         return null;
     }
 }

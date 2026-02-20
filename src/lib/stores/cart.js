@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
 
 function createCart() {
     const { subscribe, set, update } = writable([]);
