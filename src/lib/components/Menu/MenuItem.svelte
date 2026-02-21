@@ -28,17 +28,19 @@
 </script>
 
 <div class="menu-item" class:popular={item.popular}>
+    <!-- accessibility-fix: issue-19, issue-10 - Decorative icons aria-hidden -->
     <div class="item-image">
-        <div class="image-placeholder">
+        <div class="image-placeholder" aria-hidden="true">
             <i class={getCategoryIcon(item.category)}></i>
         </div>
         {#if item.popular}
             <div class="popular-badge">
-                <i class="fas fa-fire"></i>
+                <i class="fas fa-fire" aria-hidden="true"></i>
                 Popular
             </div>
         {/if}
     </div>
+    <!-- /accessibility-fix -->
     <div class="item-content">
         <h3 class="item-name">{item.name}</h3>
         <p class="item-description">{item.description}</p>

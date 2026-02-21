@@ -26,20 +26,21 @@
         </div>
 
         <div class="contact-grid">
+            <!-- accessibility-fix: issue-10 - Decorative icons aria-hidden -->
             <div class="contact-card">
-                <div class="contact-icon">
+                <div class="contact-icon" aria-hidden="true">
                     <i class="fas fa-phone"></i>
                 </div>
                 <h3>Telefone</h3>
                 <p>{contactInfo.phone}</p>
                 <a href="tel:{contactInfo.phone.replace(/\D/g, '')}" class="contact-btn phone-btn">
-                    <i class="fas fa-phone"></i>
+                    <i class="fas fa-phone" aria-hidden="true"></i>
                     Ligar
                 </a>
             </div>
 
             <div class="contact-card">
-                <div class="contact-icon">
+                <div class="contact-icon" aria-hidden="true">
                     <i class="fas fa-map-marker-alt"></i>
                 </div>
                 <h3>Endereço</h3>
@@ -57,7 +58,7 @@
             </div>
 
             <div class="contact-card">
-                <div class="contact-icon">
+                <div class="contact-icon" aria-hidden="true">
                     <i class="fas fa-clock"></i>
                 </div>
                 <h3>Horário de Funcionamento</h3>
@@ -65,6 +66,7 @@
                     <p>{contactInfo.hours.weekdays}</p>
                 </div>
             </div>
+            <!-- /accessibility-fix -->
         </div>
     </div>
 </section>

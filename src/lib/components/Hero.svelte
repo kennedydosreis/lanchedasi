@@ -10,8 +10,9 @@
 <section id="inicio" class="hero" aria-label="Página inicial">
     <div class="hero-overlay"></div>
     <div class="hero-content">
+        <!-- accessibility-fix: issue-10 - Decorative icons aria-hidden -->
         <div class="hero-badge">
-            <i class="fas fa-fire"></i>
+            <i class="fas fa-fire" aria-hidden="true"></i>
             <span>Aberto de Quarta a Domingo — 18h às 23h</span>
         </div>
         <h1 class="hero-title">
@@ -23,14 +24,15 @@
         </p>
         <div class="hero-actions">
             <button class="btn-whatsapp" on:click={openWhatsApp}>
-                <i class="fab fa-whatsapp"></i>
+                <i class="fab fa-whatsapp" aria-hidden="true"></i>
                 Pedir pelo WhatsApp
             </button>
             <a href="#menu" class="btn-menu">
-                <i class="fas fa-utensils"></i>
+                <i class="fas fa-utensils" aria-hidden="true"></i>
                 Ver Cardápio
             </a>
         </div>
+        <!-- /accessibility-fix -->
         <div class="hero-stats">
             <div class="stat">
                 <span class="stat-icon">⭐</span>
