@@ -27,21 +27,39 @@
         <p class="item-price">{formatPrice(item.price)}</p>
     </div>
 
+    <!-- accessibility-fix: issue-20, issue-3 - Quantity buttons and remove button accessible names -->
     <div class="item-controls">
-        <div class="quantity-controls">
-            <button class="quantity-btn" on:click={() => updateQuantity(item.quantity - 1)}>-</button>
-            <span class="quantity">{item.quantity}</span>
-            <button class="quantity-btn" on:click={() => updateQuantity(item.quantity + 1)}>+</button>
+        <div class="quantity-controls" role="group" aria-label={`Quantidade de ${item.name}`}>
+            <button 
+                class="quantity-btn" 
+                on:click={() => updateQuantity(item.quantity - 1)}
+                aria-label={`Diminuir quantidade de ${item.name}`}
+                disabled={item.quantity <= 1}
+            >
+                <span aria-hidden="true">-</span>
+            </button>
+            <span class="quantity" aria-live="polite" aria-atomic="true">
+                <span class="sr-only">Quantidade:</span>
+                {item.quantity}
+            </span>
+            <button 
+                class="quantity-btn" 
+                on:click={() => updateQuantity(item.quantity + 1)}
+                aria-label={`Aumentar quantidade de ${item.name}`}
+            >
+                <span aria-hidden="true">+</span>
+            </button>
         </div>
 
         <div class="item-total">
             {formatPrice(itemTotal)}
         </div>
 
-        <button class="remove-btn" on:click={removeItem}>
-            <i class="fas fa-trash"></i>
+        <button class="remove-btn" on:click={removeItem} aria-label={`Remover ${item.name} do carrinho`}>
+            <i class="fas fa-trash" aria-hidden="true"></i>
         </button>
     </div>
+    <!-- /accessibility-fix -->
 </div>
 
 <style>
@@ -138,6 +156,24 @@
         background: #dc2626;
     }
 
+    /* Screen reader only utility */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .quantity-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     @media (max-width: 768px) {
         .cart-item {
             flex-direction: column;
@@ -153,20 +189,20 @@
         }
 
         .quantity-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             font-size: var(--font-size-lg);
         }
 
         .quantity {
             min-width: 50px;
-            height: 40px;
+            height: 44px;
             font-size: var(--font-size-lg);
         }
 
         .remove-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
         }
     }
 </style>

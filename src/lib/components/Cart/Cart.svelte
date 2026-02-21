@@ -2,8 +2,13 @@
     import { cart } from '$lib/stores/cart.js';
     import { orderInfo } from '$lib/stores/orderInfo.js';
     import CartItem from './CartItem.svelte';
+    import { onMount, tick } from 'svelte';
 
     let isOpen = false;
+    /** @type {HTMLButtonElement} */
+    let cartToggleButton;
+    /** @type {HTMLDivElement} */
+    let cartPanel;
     let observations = '';
     let showLocationError = false;
     let locationErrorMessage = '';
@@ -11,8 +16,53 @@
     let manualAddress = '';
     let recalculateDistance = false;
 
+    async function openCart() {
+        isOpen = true;
+        await tick();
+        // Move focus to close button (first focusable element in dialog)
+        const closeBtn = cartPanel?.querySelector('.close-btn');
+        closeBtn?.focus();
+    }
+
+    function closeCart() {
+        isOpen = false;
+        // Return focus to trigger button
+        cartToggleButton?.focus();
+    }
+
     function toggleCart() {
-        isOpen = !isOpen;
+        if (isOpen) {
+            closeCart();
+        } else {
+            openCart();
+        }
+    }
+
+    /**
+     * Handle keyboard events for focus trap and escape
+     * @param {KeyboardEvent} e
+     */
+    function handleDialogKeydown(e) {
+        if (e.key === 'Escape') {
+            closeCart();
+            return;
+        }
+
+        // Focus trap logic
+        if (e.key === 'Tab' && cartPanel) {
+            const focusableSelector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+            const focusableElements = cartPanel.querySelectorAll(focusableSelector);
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey && document.activeElement === firstElement) {
+                lastElement?.focus();
+                e.preventDefault();
+            } else if (!e.shiftKey && document.activeElement === lastElement) {
+                firstElement?.focus();
+                e.preventDefault();
+            }
+        }
     }
 
     function formatPrice(price) {
@@ -176,43 +226,57 @@
     $: finalTotal = total + ($orderInfo.deliveryFee || 0);
 </script>
 
+<!-- accessibility-fix: issue-3, issue-5, issue-18 - Cart toggle, dialog and overlay accessibility -->
 <div class="cart-container">
-    <button class="cart-toggle" on:click={toggleCart} class:has-items={itemCount > 0}>
-        <i class="fas fa-shopping-cart"></i>
+    <button 
+        bind:this={cartToggleButton}
+        class="cart-toggle" 
+        on:click={toggleCart} 
+        class:has-items={itemCount > 0}
+        aria-label={`Abrir carrinho. ${itemCount} ${itemCount === 1 ? 'item' : 'itens'}`}
+        aria-expanded={isOpen}
+    >
+        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
         {#if itemCount > 0}
-            <span class="cart-badge">{itemCount}</span>
+            <span class="cart-badge" aria-hidden="true">{itemCount}</span>
         {/if}
     </button>
 
     {#if isOpen}
         <div
             class="cart-overlay"
-            on:click={toggleCart}
-            on:keydown={(e) => e.key === 'Escape' && toggleCart()}
-            role="button"
-            tabindex="0"
-            aria-label="Fechar carrinho"
+            on:click={closeCart}
+            aria-hidden="true"
         ></div>
-        <div class="cart-panel">
+        <div 
+            bind:this={cartPanel}
+            class="cart-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cart-title"
+            on:keydown={handleDialogKeydown}
+        >
             <div class="cart-header">
-                <h3>Seu Pedido</h3>
-                <button class="close-btn" on:click={toggleCart}>
-                    <i class="fas fa-times"></i>
+                <h3 id="cart-title">Seu Pedido</h3>
+                <button class="close-btn" on:click={closeCart} aria-label="Fechar carrinho">
+                    <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
 
             <div class="cart-content">
                 {#if $cart.length === 0}
                     <div class="empty-cart">
-                        <i class="fas fa-shopping-cart"></i>
+                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                         <p>Seu carrinho está vazio</p>
                     </div>
                 {:else}
-                    <div class="cart-items">
+                    <!-- accessibility-fix: issue-8 - Live region for cart updates -->
+                    <div class="cart-items" aria-live="polite" aria-atomic="false">
                         {#each $cart as item}
                             <CartItem {item} />
                         {/each}
                     </div>
+                    <!-- /accessibility-fix -->
 
                     <div class="order-details">
                         <div class="form-group">
@@ -259,7 +323,7 @@
                                                 on:click={saveManualAddress}
                                                 disabled={!manualAddress.trim()}
                                             >
-                                                <i class="fas fa-check"></i>
+                                                <i class="fas fa-check" aria-hidden="true"></i>
                                                 {#if $orderInfo.address}
                                                     Atualizar Endereço
                                                 {:else}
@@ -267,14 +331,14 @@
                                                 {/if}
                                             </button>
                                             <button class="cancel-address-btn" on:click={toggleManualAddress}>
-                                                <i class="fas fa-times"></i>
+                                                <i class="fas fa-times" aria-hidden="true"></i>
                                                 Cancelar
                                             </button>
                                         </div>
                                     </div>
                                 {:else if $orderInfo.address}
                                     <div class="location-display">
-                                        <i class="fas fa-map-marker-alt"></i>
+                                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                                         <div class="location-info">
                                             <span class="address">{$orderInfo.address}</span>
                                             {#if $orderInfo.distance !== null}
@@ -305,11 +369,11 @@
                                         </div>
                                         <div class="location-actions">
                                             <button class="location-clear" on:click={() => orderInfo.clear()} aria-label="Limpar localização">
-                                                <i class="fas fa-times"></i>
+                                                <i class="fas fa-times" aria-hidden="true"></i>
                                             </button>
                                             {#if $orderInfo.location && $orderInfo.location.accuracy && $orderInfo.location.accuracy > 100}
                                                 <button class="fix-address-btn" on:click={toggleManualAddress} aria-label="Corrigir endereço">
-                                                    <i class="fas fa-edit"></i>
+                                                    <i class="fas fa-edit" aria-hidden="true"></i>
                                                     <span>Corrigir</span>
                                                 </button>
                                             {/if}
@@ -323,16 +387,16 @@
                                             disabled={$orderInfo.isLoadingLocation}
                                         >
                                             {#if $orderInfo.isLoadingLocation}
-                                                <i class="fas fa-spinner fa-spin"></i>
+                                                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
                                                 Calculando entrega...
                                             {:else}
-                                                <i class="fas fa-location-arrow"></i>
+                                                <i class="fas fa-location-arrow" aria-hidden="true"></i>
                                                 Usar minha localização
                                             {/if}
                                         </button>
 
                                         <button class="manual-btn" on:click={toggleManualAddress}>
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit" aria-hidden="true"></i>
                                             Digitar endereço
                                         </button>
                                     </div>
@@ -344,8 +408,8 @@
                                 {/if}
 
                                 {#if showLocationError}
-                                    <div class="error-message">
-                                        <i class="fas fa-exclamation-triangle"></i>
+                                    <div class="error-message" role="alert">
+                                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                                         {locationErrorMessage}
                                     </div>
                                 {/if}
@@ -379,7 +443,7 @@
                             on:click={sendOrder}
                             disabled={!$orderInfo.canDeliver && $orderInfo.location}
                         >
-                            <i class="fab fa-whatsapp"></i>
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
                             {#if !$orderInfo.canDeliver && $orderInfo.location}
                                 Fora da área de entrega
                             {:else}

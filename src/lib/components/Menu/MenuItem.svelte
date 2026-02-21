@@ -28,24 +28,26 @@
 </script>
 
 <div class="menu-item" class:popular={item.popular}>
+    <!-- accessibility-fix: issue-19, issue-10 - Decorative icons aria-hidden -->
     <div class="item-image">
-        <div class="image-placeholder">
+        <div class="image-placeholder" aria-hidden="true">
             <i class={getCategoryIcon(item.category)}></i>
         </div>
         {#if item.popular}
             <div class="popular-badge">
-                <i class="fas fa-fire"></i>
+                <i class="fas fa-fire" aria-hidden="true"></i>
                 Popular
             </div>
         {/if}
     </div>
+    <!-- /accessibility-fix -->
     <div class="item-content">
         <h3 class="item-name">{item.name}</h3>
         <p class="item-description">{item.description}</p>
         <div class="item-footer">
             <span class="item-price">{formatPrice(item.price)}</span>
-            <button class="add-button" on:click={addToCart}>
-                <i class="fas fa-plus"></i>
+            <button class="add-button" on:click={addToCart} aria-label="Adicionar {item.name} ao carrinho">
+                <i class="fas fa-plus" aria-hidden="true"></i>
                 Adicionar
             </button>
         </div>

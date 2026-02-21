@@ -25,16 +25,17 @@
     }
 </script>
 
-<section id="funcionalidades" class="features-section">
+<section id="funcionalidades" class="features-section" aria-label="Funcionalidades especiais">
     <div class="container">
         <div class="section-header">
             <h2 class="section-title">Funcionalidades Especiais</h2>
             <p class="section-subtitle">Facilite seu pedido com nossas novas funcionalidades</p>
         </div>
 
+        <!-- accessibility-fix: issue-10 - Decorative icons aria-hidden -->
         <div class="features-grid">
             <div class="feature-card">
-                <div class="feature-icon">
+                <div class="feature-icon" aria-hidden="true">
                     <i class="fas fa-sticky-note"></i>
                 </div>
                 <h3>Observações Personalizadas</h3>
@@ -45,7 +46,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">
+                <div class="feature-icon" aria-hidden="true">
                     <i class="fas fa-map-marker-alt"></i>
                 </div>
                 <h3>Localização Automática</h3>
@@ -53,10 +54,10 @@
                 <div class="location-demo">
                     {#if $orderInfo.address}
                         <div class="location-display">
-                            <i class="fas fa-check-circle"></i>
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
                             <span>{$orderInfo.address}</span>
                             <button class="clear-btn" on:click={clearLocation} aria-label="Limpar localização">
-                                <i class="fas fa-times"></i>
+                                <i class="fas fa-times" aria-hidden="true"></i>
                             </button>
                         </div>
                     {:else}
@@ -66,18 +67,18 @@
                             disabled={$orderInfo.isLoadingLocation}
                         >
                             {#if $orderInfo.isLoadingLocation}
-                                <i class="fas fa-spinner fa-spin"></i>
+                                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
                                 Obtendo...
                             {:else}
-                                <i class="fas fa-location-arrow"></i>
+                                <i class="fas fa-location-arrow" aria-hidden="true"></i>
                                 Obter Localização
                             {/if}
                         </button>
                     {/if}
 
                     {#if showLocationError}
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-triangle"></i>
+                        <div class="error-message" role="alert">
+                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                             {locationErrorMessage}
                         </div>
                     {/if}
@@ -85,7 +86,7 @@
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">
+                <div class="feature-icon" aria-hidden="true">
                     <i class="fab fa-whatsapp"></i>
                 </div>
                 <h3>Pedido via WhatsApp</h3>

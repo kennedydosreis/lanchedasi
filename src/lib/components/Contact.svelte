@@ -18,7 +18,7 @@
     }
 </script>
 
-<section id="contato" class="contact-section">
+<section id="contato" class="contact-section" aria-label="Informações de contato">
     <div class="container">
         <div class="section-header">
             <h2 class="section-title">Entre em Contato</h2>
@@ -26,32 +26,39 @@
         </div>
 
         <div class="contact-grid">
+            <!-- accessibility-fix: issue-10 - Decorative icons aria-hidden -->
             <div class="contact-card">
-                <div class="contact-icon">
+                <div class="contact-icon" aria-hidden="true">
                     <i class="fas fa-phone"></i>
                 </div>
                 <h3>Telefone</h3>
                 <p>{contactInfo.phone}</p>
                 <a href="tel:{contactInfo.phone.replace(/\D/g, '')}" class="contact-btn phone-btn">
-                    <i class="fas fa-phone"></i>
+                    <i class="fas fa-phone" aria-hidden="true"></i>
                     Ligar
                 </a>
             </div>
 
             <div class="contact-card">
-                <div class="contact-icon">
+                <div class="contact-icon" aria-hidden="true">
                     <i class="fas fa-map-marker-alt"></i>
                 </div>
                 <h3>Endereço</h3>
                 <p>{contactInfo.address}</p>
-                <button class="contact-btn location-btn">
-                    <i class="fas fa-map"></i>
+                <a
+                    href="https://www.google.com/maps/search/?api=1&query={contactInfo.coordinates.lat},{contactInfo.coordinates.lng}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="contact-btn location-btn"
+                    aria-label="Ver endereço no Google Maps"
+                >
+                    <i class="fas fa-map" aria-hidden="true"></i>
                     Ver no Mapa
-                </button>
+                </a>
             </div>
 
             <div class="contact-card">
-                <div class="contact-icon">
+                <div class="contact-icon" aria-hidden="true">
                     <i class="fas fa-clock"></i>
                 </div>
                 <h3>Horário de Funcionamento</h3>
@@ -59,6 +66,7 @@
                     <p>{contactInfo.hours.weekdays}</p>
                 </div>
             </div>
+            <!-- /accessibility-fix -->
         </div>
     </div>
 </section>
