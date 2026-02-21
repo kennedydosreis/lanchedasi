@@ -25,7 +25,7 @@
     }
 </script>
 
-<section id="funcionalidades" class="features-section">
+<section id="funcionalidades" class="features-section" aria-label="Funcionalidades especiais">
     <div class="container">
         <div class="section-header">
             <h2 class="section-title">Funcionalidades Especiais</h2>

@@ -18,7 +18,7 @@
     }
 </script>
 
-<section id="contato" class="contact-section">
+<section id="contato" class="contact-section" aria-label="Informações de contato">
     <div class="container">
         <div class="section-header">
             <h2 class="section-title">Entre em Contato</h2>
@@ -44,10 +44,16 @@
                 </div>
                 <h3>Endereço</h3>
                 <p>{contactInfo.address}</p>
-                <button class="contact-btn location-btn">
-                    <i class="fas fa-map"></i>
+                <a
+                    href="https://www.google.com/maps/search/?api=1&query={contactInfo.coordinates.lat},{contactInfo.coordinates.lng}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="contact-btn location-btn"
+                    aria-label="Ver endereço no Google Maps"
+                >
+                    <i class="fas fa-map" aria-hidden="true"></i>
                     Ver no Mapa
-                </button>
+                </a>
             </div>
 
             <div class="contact-card">

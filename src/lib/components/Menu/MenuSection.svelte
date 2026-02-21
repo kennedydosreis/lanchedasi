@@ -56,7 +56,7 @@
     const popularItems = getPopularItems();
 </script>
 
-<section id="menu" class="menu-section">
+<section id="menu" class="menu-section" aria-label="Cardápio">
     <div class="container">
         <div class="section-header">
             <h2 class="gradient-text">Nosso Cardápio</h2>

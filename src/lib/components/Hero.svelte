@@ -7,7 +7,7 @@
     }
 </script>
 
-<section id="inicio" class="hero">
+<section id="inicio" class="hero" aria-label="Página inicial">
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <div class="hero-badge">

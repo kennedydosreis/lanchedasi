@@ -7,7 +7,7 @@
     export let description = '';
 </script>
 
-<div class="menu-category" id={categoryId}>
+<section class="menu-category" id={categoryId} aria-label={title}>
     <div class="category-header">
         <h3 class="category-title">{title}</h3>
         {#if description}
@@ -19,7 +19,7 @@
             <MenuItem {item} />
         {/each}
     </div>
-</div>
+</section>
 
 <style>
     .menu-category {

@@ -19,8 +19,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </svelte:head>
 
+<a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
 <Header />
-<main>
+<main id="conteudo-principal" role="main" aria-label="Conteúdo principal">
     <slot />
 </main>
 <Cart />

@@ -44,8 +44,8 @@
         <p class="item-description">{item.description}</p>
         <div class="item-footer">
             <span class="item-price">{formatPrice(item.price)}</span>
-            <button class="add-button" on:click={addToCart}>
-                <i class="fas fa-plus"></i>
+            <button class="add-button" on:click={addToCart} aria-label="Adicionar {item.name} ao carrinho">
+                <i class="fas fa-plus" aria-hidden="true"></i>
                 Adicionar
             </button>
         </div>

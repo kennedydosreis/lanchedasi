@@ -60,22 +60,24 @@
                 </a>
             </div>
 
-            <div class="nav-links" class:active={isMobileMenuOpen}>
+            <nav class="nav-links" id="nav-links" class:active={isMobileMenuOpen} aria-label="Menu principal">
                 {#each navItems as item}
                     <a href={item.href} class="nav-link" on:click={closeMobileMenu}>
-                        <i class={item.icon}></i>
+                        <i class={item.icon} aria-hidden="true"></i>
                         <span>{item.label}</span>
                     </a>
                 {/each}
-            </div>
+            </nav>
 
             <button
                 class="nav-mobile-toggle"
                 class:active={isMobileMenuOpen}
                 on:click={toggleMobileMenu}
-                aria-label="Toggle menu"
+                aria-label={isMobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="nav-links"
             >
-                <i class="fas {isMobileMenuOpen ? 'fa-times' : 'fa-bars'}"></i>
+                <i class="fas {isMobileMenuOpen ? 'fa-times' : 'fa-bars'}" aria-hidden="true"></i>
             </button>
         </nav>
     </div>
