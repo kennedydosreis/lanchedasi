@@ -81,35 +81,6 @@
         },
         "sameAs": []
     };
-
-    const localBusinessData = {
-        "@context": "https://schema.org",
-        "@type": "FoodEstablishment",
-        "name": "Lanche da Si",
-        "image": `${siteUrl}/logo-lanche-da-si.png`,
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Rua Itororo, 22, Beco Esperança - Alvorada",
-            "addressLocality": "Manaus",
-            "addressRegion": "AM",
-            "addressCountry": "BR"
-        },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": -3.0863,
-            "longitude": -59.9819
-        },
-        "url": siteUrl,
-        "telephone": "+5592993525884",
-        "openingHoursSpecification": [
-            {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                "opens": "18:00",
-                "closes": "23:00"
-            }
-        ]
-    };
 </script>
 
 <svelte:head>
@@ -137,5 +108,4 @@
     <link rel="canonical" href={canonicalUrl} />
 
     {@html `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`}
-    {@html `<script type="application/ld+json">${JSON.stringify(localBusinessData)}</script>`}
 </svelte:head>
