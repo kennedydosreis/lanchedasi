@@ -1,53 +1,30 @@
 import { findItemById } from './loadMenu.js';
 
 export function validateItem(item, menuData) {
-    if (!item || !item.id) {
-        return {
-            valid: false,
-            error: 'Item inválido: ID ausente',
-            validatedItem: null
-        };
+    if (!item?.id) {
+        return { valid: false, error: 'Item inválido: ID ausente', validatedItem: null };
     }
 
-    // Find the real item in menu
     const menuItem = findItemById(menuData, item.id);
-
     if (!menuItem) {
-        return {
-            valid: false,
-            error: `Item não encontrado no cardápio: ${item.id}`,
-            validatedItem: null
-        };
+        return { valid: false, error: `Item não encontrado no cardápio: ${item.id}`, validatedItem: null };
     }
 
-    // Check if price matches
+    const validatedItem = {
+        ...item,
+        price: menuItem.price,
+        name: menuItem.name,
+        description: menuItem.description,
+        image: menuItem.image,
+        category: menuItem.category
+    };
+
     if (item.price !== menuItem.price) {
         console.warn(`Price mismatch for ${item.id}: cart=${item.price}, menu=${menuItem.price}`);
-        return {
-            valid: false,
-            error: `Preço incorreto para ${menuItem.name}`,
-            validatedItem: {
-                ...item,
-                price: menuItem.price, // Use real price from menu
-                name: menuItem.name,
-                description: menuItem.description,
-                image: menuItem.image
-            }
-        };
+        return { valid: false, error: `Preço incorreto para ${menuItem.name}`, validatedItem };
     }
 
-    return {
-        valid: true,
-        error: null,
-        validatedItem: {
-            ...item,
-            // Ensure we have all necessary fields from menu
-            name: menuItem.name,
-            description: menuItem.description,
-            image: menuItem.image,
-            category: menuItem.category
-        }
-    };
+    return { valid: true, error: null, validatedItem };
 }
 
 export function sanitizeQuantity(qty) {
@@ -59,11 +36,7 @@ export function sanitizeQuantity(qty) {
 
 export function recalculateCart(cartItems, menuData) {
     if (!Array.isArray(cartItems)) {
-        return {
-            items: [],
-            invalid: [],
-            errors: ['Carrinho inválido']
-        };
+        return { items: [], invalid: [], errors: ['Carrinho inválido'] };
     }
 
     const validItems = [];
@@ -71,49 +44,27 @@ export function recalculateCart(cartItems, menuData) {
     const errors = [];
 
     for (const item of cartItems) {
-        // Sanitize quantity first
         const safeQuantity = sanitizeQuantity(item.quantity);
+        const validation = validateItem({ ...item, quantity: safeQuantity }, menuData);
 
-        // Validate item
-        const validation = validateItem(
-            { ...item, quantity: safeQuantity },
-            menuData
-        );
-
-        if (validation.valid) {
-            validItems.push({
-                ...validation.validatedItem,
-                quantity: safeQuantity
-            });
-        } else {
-            // If we have a validated item with corrected price, use it
-            if (validation.validatedItem) {
-                validItems.push({
-                    ...validation.validatedItem,
-                    quantity: safeQuantity
-                });
+        if (validation.valid || validation.validatedItem) {
+            validItems.push({ ...validation.validatedItem, quantity: safeQuantity });
+            if (!validation.valid) {
                 errors.push(`${validation.error} - preço corrigido`);
-            } else {
-                invalidItems.push(item);
-                errors.push(validation.error);
             }
+        } else {
+            invalidItems.push(item);
+            errors.push(validation.error);
         }
     }
 
-    return {
-        items: validItems,
-        invalid: invalidItems,
-        errors: errors.length > 0 ? errors : null
-    };
+    return { items: validItems, invalid: invalidItems, errors: errors.length ? errors : null };
 }
 
 export function calculateTotal(cartItems) {
     if (!Array.isArray(cartItems)) return 0;
-
     return cartItems.reduce((total, item) => {
-        const price = Number(item.price) || 0;
-        const quantity = sanitizeQuantity(item.quantity);
-        return total + (price * quantity);
+        return total + (Number(item.price) || 0) * sanitizeQuantity(item.quantity);
     }, 0);
 }
 
@@ -138,31 +89,22 @@ export function truncateWhatsAppMessage(message, maxChars = 1800) {
 }
 
 export function validateCartForCheckout(cartItems, menuData) {
-    if (!cartItems || cartItems.length === 0) {
-        return {
-            valid: false,
-            errors: ['Carrinho vazio'],
-            validatedCart: [],
-            total: 0
-        };
+    if (!cartItems?.length) {
+        return { valid: false, errors: ['Carrinho vazio'], validatedCart: [], total: 0 };
     }
 
     const recalculated = recalculateCart(cartItems, menuData);
+    const total = calculateTotal(recalculated.items);
     
     if (recalculated.invalid.length > 0) {
         return {
             valid: false,
             errors: recalculated.errors || ['Itens inválidos no carrinho'],
             validatedCart: recalculated.items,
-            total: calculateTotal(recalculated.items),
+            total,
             invalidItems: recalculated.invalid
         };
     }
 
-    return {
-        valid: true,
-        errors: recalculated.errors, // May have warnings
-        validatedCart: recalculated.items,
-        total: calculateTotal(recalculated.items)
-    };
+    return { valid: true, errors: recalculated.errors, validatedCart: recalculated.items, total };
 }

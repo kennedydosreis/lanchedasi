@@ -158,6 +158,7 @@
     $: subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 </script>
 
+<!-- accessibility-fix: issue-26 - Focus management and trap needed -->
 <div class="modal-overlay" on:click={onClose} on:keydown={handleKeydown} role="presentation">
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div class="modal-content" on:click|stopPropagation on:keydown role="dialog" aria-labelledby="checkout-title" aria-modal="true">
@@ -191,6 +192,7 @@
                 <div class="form-section">
                     <h3>Dados do Cliente</h3>
                     
+                    <!-- accessibility-fix: issue-27 - Form validation errors need aria-invalid and aria-describedby -->
                     <div class="form-group" class:has-error={errors.name}>
                         <label for="name">
                             Nome Completo <span class="required">*</span>
@@ -206,6 +208,7 @@
                             <span class="error-message">{errors.name}</span>
                         {/if}
                     </div>
+                    <!-- /accessibility-fix -->
                 </div>
 
                 <div class="form-section">
@@ -274,6 +277,7 @@
                     </div>
                 </div>
 
+                <!-- accessibility-fix: issue-28 - Payment radio buttons need fieldset/legend -->
                 <div class="form-section">
                     <h3>Forma de Pagamento</h3>
                     
@@ -321,7 +325,9 @@
                         </label>
                     </div>
                 </div>
+                <!-- /accessibility-fix -->
 
+                <!-- accessibility-fix: issue-30 - Textarea missing proper label -->
                 <div class="form-section">
                     <h3>Observações <span class="optional">(opcional)</span></h3>
                     
@@ -334,6 +340,7 @@
                         ></textarea>
                     </div>
                 </div>
+                <!-- /accessibility-fix -->
 
                 {#if validationError}
                     <div class="validation-error" role="alert">
@@ -346,6 +353,7 @@
                     <button type="button" class="btn-cancel" on:click={onClose}>
                         Cancelar
                     </button>
+                    <!-- accessibility-fix: issue-31 - Submit button state not announced -->
                     <button type="submit" class="btn-submit" disabled={isSubmitting}>
                         {#if isSubmitting}
                             <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
@@ -355,6 +363,7 @@
                             Finalizar no WhatsApp
                         {/if}
                     </button>
+                    <!-- /accessibility-fix -->
                 </div>
             </form>
         </div>
