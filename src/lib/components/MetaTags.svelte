@@ -1,7 +1,8 @@
 <script>
+    import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import { base } from '$app/paths';
-    import { menuData } from '$lib/data/menu.js';
+    import { loadMenuData } from '$lib/utils/loadMenu.js';
 
     export let title = 'Lanche da Si - Os melhores lanches de Manaus | Delivery';
     export let description = 'Lanchonete em Manaus com delivery. Hambúrgueres, kikões, yakisoba, porções e mais. Peça pelo WhatsApp! Aberto de quarta a domingo, 18h às 23h.';
@@ -10,10 +11,14 @@
 
     const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://www.lanchedasi.com.br';
 
+    let menuData = null;
+
     $: canonicalUrl = new URL(base + $page.url.pathname, siteUrl).href;
 
     // Build menu sections for structured data
-    function buildMenuSections() {
+    function buildMenuSections(data) {
+        if (!data) return [];
+
         const sections = [
             { key: 'combos', name: 'Combos Especiais' },
             { key: 'sanduiches', name: 'Sanduíches' },
@@ -24,11 +29,11 @@
         ];
 
         return sections
-            .filter(s => menuData[s.key]?.length)
+            .filter(s => data[s.key]?.length)
             .map(s => ({
                 "@type": "MenuSection",
                 "name": s.name,
-                "hasMenuItem": menuData[s.key].map(item => ({
+                "hasMenuItem": data[s.key].map(item => ({
                     "@type": "MenuItem",
                     "name": item.name,
                     "description": item.description,
@@ -41,46 +46,63 @@
             }));
     }
 
-    const structuredData = {
-        "@context": "https://schema.org",
-        "@type": "Restaurant",
-        "name": "Lanche da Si",
-        "description": description,
-        "image": `${siteUrl}/logo-lanche-da-si.png`,
-        "url": siteUrl,
-        "telephone": "+5592993525884",
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Rua Itororo, 22, Beco Esperança - Alvorada",
-            "addressLocality": "Manaus",
-            "addressRegion": "AM",
-            "postalCode": "69042-040",
-            "addressCountry": "BR"
-        },
-        "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": -3.0863,
-            "longitude": -59.9819
-        },
-        "servesCuisine": ["Brasileira", "Lanches", "Fast Food"],
-        "priceRange": "$",
-        "currenciesAccepted": "BRL",
-        "paymentAccepted": "Dinheiro, PIX",
-        "openingHoursSpecification": [
-            {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                "opens": "18:00",
-                "closes": "23:00"
-            }
-        ],
-        "hasMenu": {
-            "@type": "Menu",
-            "name": "Cardápio Lanche da Si",
-            "hasMenuSection": buildMenuSections()
-        },
-        "sameAs": []
-    };
+    function getStructuredData(data) {
+        const structuredData = {
+            "@context": "https://schema.org",
+            "@type": "Restaurant",
+            "name": "Lanche da Si",
+            "description": description,
+            "image": `${siteUrl}/logo-lanche-da-si.png`,
+            "url": siteUrl,
+            "telephone": "+5592993525884",
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Rua Itororo, 22, Beco Esperança - Alvorada",
+                "addressLocality": "Manaus",
+                "addressRegion": "AM",
+                "postalCode": "69042-040",
+                "addressCountry": "BR"
+            },
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": -3.0863,
+                "longitude": -59.9819
+            },
+            "servesCuisine": ["Brasileira", "Lanches", "Fast Food"],
+            "priceRange": "$",
+            "currenciesAccepted": "BRL",
+            "paymentAccepted": "Dinheiro, PIX",
+            "openingHoursSpecification": [
+                {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    "opens": "18:00",
+                    "closes": "23:00"
+                }
+            ]
+        };
+
+        // Add menu if data is loaded
+        if (data) {
+            structuredData.hasMenu = {
+                "@type": "Menu",
+                "name": "Cardápio Lanche da Si",
+                "hasMenuSection": buildMenuSections(data)
+            };
+        }
+
+        return structuredData;
+    }
+
+    onMount(async () => {
+        try {
+            menuData = await loadMenuData();
+        } catch (err) {
+            console.error('Error loading menu for structured data:', err);
+        }
+    });
+
+    $: structuredData = getStructuredData(menuData);
 </script>
 
 <svelte:head>
