@@ -30,9 +30,18 @@
 <div class="menu-item" class:popular={item.popular}>
     <!-- accessibility-fix: issue-19, issue-10 - Decorative icons aria-hidden -->
     <div class="item-image">
-        <div class="image-placeholder" aria-hidden="true">
-            <i class={getCategoryIcon(item.category)}></i>
-        </div>
+        {#if item.image && !item.image.includes('/assets/produtos/')}
+            <img 
+                src={item.image} 
+                alt={item.name} 
+                class="product-image"
+                loading="lazy"
+            />
+        {:else}
+            <div class="image-placeholder" aria-hidden="true">
+                <i class={getCategoryIcon(item.category)}></i>
+            </div>
+        {/if}
         {#if item.popular}
             <div class="popular-badge">
                 <i class="fas fa-fire" aria-hidden="true"></i>
@@ -82,6 +91,17 @@
         width: 100%;
         height: 200px;
         overflow: hidden;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .menu-item:hover .product-image {
+        transform: scale(1.05);
     }
 
     .image-placeholder {

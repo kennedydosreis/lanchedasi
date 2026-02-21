@@ -7,15 +7,15 @@
       "description": "1 X-Salada + 1 Batata Frita P + 1 Refrigerante (Magistral ou Regente) 350ml",
       "price": 20.00,
       "category": "combos",
-      "image": "/assets/produtos/combo-1.jpg"
+      "image": "https://placehold.co/400x300?text=Combo+1"
     },
     {
       "id": "combo-2",
       "name": "Combo 2",
       "description": "2 X-Saladas + 1 Batata Frita P + 1 Refrigerante (Magistral ou Regente) 1,5L",
-      "price": 30.00,
+      "price": 30.0,
       "category": "combos",
-      "image": "/assets/produtos/combo-2.jpg"
+      "image": "https://placehold.co/400x300?text=Combo+2"
     },
     {
       "id": "combo-3",
@@ -66,15 +66,15 @@
       "description": "Pão, ovo, hambúrguer, queijo, presunto, alface e tomate",
       "price": 12.00,
       "category": "sanduiches",
-      "image": "/assets/produtos/x-salada.jpg"
+      "image": "https://placehold.co/400x300?text=X-Salada"
     },
     {
       "id": "sanduiche-2",
       "name": "X-Salada com Calabresa",
       "description": "Pão, ovo, hambúrguer, queijo, presunto, alface, tomate e calabresa",
-      "price": 14.00,
+      "price": 14.0,
       "category": "sanduiches",
-      "image": "/assets/produtos/x-salada-calabresa.jpg"
+      "image": "https://placehold.co/400x300?text=X-Salada+Calabresa"
     },
     {
       "id": "sanduiche-3",
