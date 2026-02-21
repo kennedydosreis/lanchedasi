@@ -2,9 +2,11 @@
     import { cart } from '$lib/stores/cart.js';
     import { orderInfo } from '$lib/stores/orderInfo.js';
     import CartItem from './CartItem.svelte';
+    import CheckoutModal from '../Checkout/CheckoutModal.svelte';
     import { onMount, tick } from 'svelte';
 
     let isOpen = false;
+    let showCheckoutModal = false;
     /** @type {HTMLButtonElement} */
     let cartToggleButton;
     /** @type {HTMLDivElement} */
@@ -207,6 +209,22 @@
         message += "Obrigado pela preferência! 😊";
 
         return encodeURIComponent(message);
+    }
+
+    function openCheckoutModal() {
+        if ($cart.length === 0) return;
+        showCheckoutModal = true;
+    }
+
+    function closeCheckoutModal() {
+        showCheckoutModal = false;
+    }
+
+    function handleCheckoutConfirm() {
+        // Clear cart after successful checkout
+        cart.clear();
+        showCheckoutModal = false;
+        closeCart();
     }
 
     function sendOrder() {
@@ -438,22 +456,39 @@
                                 <strong>Total: {formatPrice(finalTotal)}</strong>
                             </div>
                         </div>
-                        <button
-                            class="order-btn"
-                            on:click={sendOrder}
-                            disabled={!$orderInfo.canDeliver && $orderInfo.location}
-                        >
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            {#if !$orderInfo.canDeliver && $orderInfo.location}
-                                Fora da área de entrega
-                            {:else}
-                                Fazer Pedido
-                            {/if}
-                        </button>
+                        <div class="footer-buttons">
+                            <button
+                                class="order-btn checkout-btn"
+                                on:click={openCheckoutModal}
+                            >
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                Finalizar Pedido
+                            </button>
+                            <button
+                                class="order-btn legacy-btn"
+                                on:click={sendOrder}
+                                disabled={!$orderInfo.canDeliver && $orderInfo.location}
+                            >
+                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                {#if !$orderInfo.canDeliver && $orderInfo.location}
+                                    Fora da área de entrega
+                                {:else}
+                                    Pedido Rápido (com localização)
+                                {/if}
+                            </button>
+                        </div>
                     </div>
                 {/if}
             </div>
         </div>
+    {/if}
+
+    {#if showCheckoutModal}
+        <CheckoutModal
+            cartItems={$cart}
+            onClose={closeCheckoutModal}
+            onConfirm={handleCheckoutConfirm}
+        />
     {/if}
 </div>
 
@@ -1022,6 +1057,27 @@
         50% { transform: scale(1.05); }
     }
 
+    .footer-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+    }
+
+    .checkout-btn {
+        background: var(--secondary-color);
+    }
+
+    .checkout-btn:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+
+    .legacy-btn {
+        font-size: var(--font-size-sm);
+        padding: var(--spacing-3);
+    }
+
     @media (max-width: 768px) {
         .cart-panel {
             width: 100%;
@@ -1057,6 +1113,15 @@
             font-size: var(--font-size-lg);
             padding: var(--spacing-4);
             min-height: 56px;
+        }
+
+        .footer-buttons {
+            gap: var(--spacing-2);
+        }
+
+        .legacy-btn {
+            font-size: var(--font-size-xs);
+            padding: var(--spacing-2);
         }
     }
 </style>
