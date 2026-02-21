@@ -150,57 +150,5 @@
             padding: var(--spacing-6);
             margin-bottom: var(--spacing-8);
         }
-
-        .menu-section {
-            padding: var(--spacing-12) 0;
-            background: var(--gray-50);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 var(--spacing-4);
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: var(--spacing-12);
-        }
-
-        .gradient-text {
-            font-size: var(--font-size-4xl);
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: var(--spacing-4);
-        }
-
-        .section-subtitle {
-            font-size: var(--font-size-lg);
-            color: var(--gray-600);
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-
-        .menu-content {
-            padding-top: var(--spacing-8);
-        }
-
-        @media (max-width: 768px) {
-            .menu-section {
-                padding: var(--spacing-8) 0;
-            }
-
-            .gradient-text {
-                font-size: var(--font-size-3xl);
-            }
-
-            .section-subtitle {
-                font-size: var(--font-size-base);
-            }
-        }
     }
 </style>
