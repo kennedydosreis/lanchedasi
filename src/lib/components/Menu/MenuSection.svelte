@@ -1,59 +1,72 @@
 <script>
+    import { onMount } from 'svelte';
     import MenuCategory from './MenuCategory.svelte';
-    import { menuData } from '$lib/data/menu.js';
+    import { loadMenuData } from '$lib/utils/loadMenu.js';
+
+    let menuData = null;
+    let loading = true;
+    let error = null;
 
     const categories = [
         {
             id: 'combos',
             title: '🍟 Combos Especiais',
-            items: menuData.combos,
             description: 'Economize com nossos combos promocionais!'
         },
         {
             id: 'sanduiches',
             title: '🍔 Sanduíches',
-            items: menuData.sanduiches,
             description: 'Sanduíches saborosos e bem preparados na hora'
         },
         {
             id: 'kikao',
             title: '🌭 Kikões',
-            items: menuData.kikao,
             description: 'Os famosos kikões da casa!'
         },
         {
             id: 'porcoes',
             title: '🍟 Porções & Salgados',
-            items: menuData.porcoes,
             description: 'Perfeitas para compartilhar'
         },
         {
             id: 'pratos',
             title: '🍽️ Pratos Principais',
-            items: menuData.pratos,
             description: 'Pratos completos e saborosos'
         },
         {
             id: 'bebidas',
             title: '🥤 Bebidas',
-            items: menuData.bebidas,
             description: 'Refrescantes e geladas'
         }
     ];
 
-    function getPopularItems() {
+    function getPopularItems(data) {
         const allItems = [
-            ...menuData.combos,
-            ...menuData.sanduiches,
-            ...menuData.kikao,
-            ...menuData.porcoes,
-            ...menuData.pratos,
-            ...menuData.bebidas
+            ...(data.combos || []),
+            ...(data.sanduiches || []),
+            ...(data.kikao || []),
+            ...(data.porcoes || []),
+            ...(data.pratos || []),
+            ...(data.bebidas || [])
         ];
         return allItems.filter(item => item.popular);
     }
 
-    const popularItems = getPopularItems();
+    onMount(async () => {
+        try {
+            menuData = await loadMenuData();
+            loading = false;
+        } catch (err) {
+            error = err.message;
+            loading = false;
+        }
+    });
+
+    $: popularItems = menuData ? getPopularItems(menuData) : [];
+    $: categoriesWithItems = menuData ? categories.map(cat => ({
+        ...cat,
+        items: menuData[cat.id] || []
+    })) : [];
 </script>
 
 <section id="menu" class="menu-section" aria-label="Cardápio">
@@ -63,26 +76,38 @@
             <p class="section-subtitle">Escolha seus pratos favoritos e monte seu pedido</p>
         </div>
 
-        {#if popularItems.length > 0}
-            <div class="popular-section">
-                <MenuCategory
-                    title="⭐ Mais Pedidos"
-                    items={popularItems}
-                    categoryId="populares"
-                />
+        {#if loading}
+            <div class="loading-state">
+                <p>Carregando cardápio...</p>
+            </div>
+        {:else if error}
+            <div class="error-state">
+                <p>Erro ao carregar o cardápio. Por favor, tente novamente.</p>
+            </div>
+        {:else if menuData}
+            {#if popularItems.length > 0}
+                <div class="popular-section">
+                    <MenuCategory
+                        title="⭐ Mais Pedidos"
+                        items={popularItems}
+                        categoryId="populares"
+                    />
+                </div>
+            {/if}
+
+            <div class="menu-content">
+                {#each categoriesWithItems as category}
+                    {#if category.items.length > 0}
+                        <MenuCategory
+                            title={category.title}
+                            items={category.items}
+                            categoryId={category.id}
+                            description={category.description}
+                        />
+                    {/if}
+                {/each}
             </div>
         {/if}
-
-        <div class="menu-content">
-            {#each categories as category}
-                <MenuCategory
-                    title={category.title}
-                    items={category.items}
-                    categoryId={category.id}
-                    description={category.description}
-                />
-            {/each}
-        </div>
     </div>
 </section>
 
@@ -131,6 +156,18 @@
 
     .menu-content {
         padding-top: var(--spacing-8);
+    }
+
+    .loading-state,
+    .error-state {
+        text-align: center;
+        padding: var(--spacing-12);
+        font-size: var(--font-size-lg);
+        color: var(--gray-600);
+    }
+
+    .error-state {
+        color: var(--error-color);
     }
 
     @media (max-width: 768px) {
