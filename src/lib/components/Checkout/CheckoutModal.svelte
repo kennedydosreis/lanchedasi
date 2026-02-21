@@ -159,7 +159,8 @@
 </script>
 
 <div class="modal-overlay" on:click={onClose} on:keydown={handleKeydown} role="presentation">
-    <div class="modal-content" on:click|stopPropagation role="dialog" aria-labelledby="checkout-title" aria-modal="true">
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+    <div class="modal-content" on:click|stopPropagation on:keydown role="dialog" aria-labelledby="checkout-title" aria-modal="true">
         <div class="modal-header">
             <h2 id="checkout-title">Finalizar Pedido</h2>
             <button class="close-btn" on:click={onClose} aria-label="Fechar">

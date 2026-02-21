@@ -1,10 +1,9 @@
 <script>
-    import { onMount } from 'svelte';
     import MenuCategory from './MenuCategory.svelte';
-    import { loadMenuData } from '$lib/utils/loadMenu.js';
 
-    let menuData = null;
-    let loading = true;
+    export let menuData = null;
+
+    let loading = false;
     let error = null;
 
     const categories = [
@@ -51,16 +50,6 @@
         ];
         return allItems.filter(item => item.popular);
     }
-
-    onMount(async () => {
-        try {
-            menuData = await loadMenuData();
-            loading = false;
-        } catch (err) {
-            error = err.message;
-            loading = false;
-        }
-    });
 
     $: popularItems = menuData ? getPopularItems(menuData) : [];
     $: categoriesWithItems = menuData ? categories.map(cat => ({
