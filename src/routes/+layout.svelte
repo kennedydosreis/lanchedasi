@@ -1,6 +1,7 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Cart from '$lib/components/Cart/Cart.svelte';
+    import WhatsAppFloat from '$lib/components/WhatsAppFloat.svelte';
     import '../app.css';
 </script>
 
@@ -14,3 +15,4 @@
     <slot />
 </main>
 <Cart />
+<WhatsAppFloat />
