@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { sanitizeQuantity } from '$lib/utils/CartValidator.js';
+import { sanitizeQuantity } from '$lib/utils/CartValidator.ts';
 
 function createCart() {
     const { subscribe, set, update } = writable([]);
