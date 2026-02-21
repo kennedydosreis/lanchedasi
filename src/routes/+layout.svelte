@@ -1,5 +1,6 @@
 <script>
     import Header from '$lib/components/Header.svelte';
+    import Footer from '$lib/components/Footer.svelte';
     import Cart from '$lib/components/Cart/Cart.svelte';
     import WhatsAppFloat from '$lib/components/WhatsAppFloat.svelte';
     import '../app.css';
@@ -24,5 +25,6 @@
 <main id="conteudo-principal" aria-label="Conteúdo principal">
     <slot />
 </main>
+<Footer />
 <Cart />
 <WhatsAppFloat />
