@@ -92,18 +92,14 @@ export function recalculateCart(cartItems: Partial<CartItem>[], menuData: MenuDa
         const safeQuantity = sanitizeQuantity(item.quantity || 1);
         const validation = validateItem({ ...item, quantity: safeQuantity }, menuData);
 
-        if (validation.valid && validation.validatedItem) {
-            validItems.push({ ...validation.validatedItem, quantity: safeQuantity });
-        } else if (validation.validatedItem) {
-            validItems.push({ ...validation.validatedItem, quantity: safeQuantity });
-            errors.push(`${validation.error} - preço corrigido`);
+        if (validation.valid || validation.validatedItem) {
+            validItems.push({ ...validation.validatedItem!, quantity: safeQuantity });
+            if (!validation.valid) {
+                errors.push(`${validation.error} - preço corrigido`);
+            }
         } else {
-            if (validation.validatedItem) {
-                invalidItems.push(validation.validatedItem);
-            }
-            if (validation.error) {
-                errors.push(validation.error);
-            }
+            invalidItems.push(item as CartItem);
+            errors.push(validation.error!);
         }
     }
 
