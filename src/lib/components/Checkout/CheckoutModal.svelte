@@ -2,6 +2,9 @@
     import { onMount } from 'svelte';
     import { validateCartForCheckout, truncateWhatsAppMessage } from '$lib/utils/CartValidator.ts';
     import { loadMenuData } from '$lib/utils/loadMenu.js';
+    import OrderSummary from './OrderSummary.svelte';
+    import AddressForm from './AddressForm.svelte';
+    import PaymentSelector from './PaymentSelector.svelte';
 
     export let cartItems = [];
     export let onClose = () => {};
@@ -158,7 +161,6 @@
     $: subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 </script>
 
-<!-- accessibility-fix: issue-26 - Focus management and trap needed -->
 <div class="modal-overlay" on:click={onClose} on:keydown={handleKeydown} role="presentation">
     <div class="modal-content" on:click|stopPropagation role="dialog" aria-labelledby="checkout-title" aria-modal="true">
         <div class="modal-header">
@@ -169,167 +171,15 @@
         </div>
 
         <div class="modal-body">
-            <!-- Order Summary -->
-            <div class="order-summary">
-                <h3>Resumo do Pedido</h3>
-                <div class="summary-items">
-                    {#each cartItems as item}
-                        <div class="summary-item">
-                            <span>{item.quantity}x {item.name}</span>
-                            <span>{formatPrice(item.price * item.quantity)}</span>
-                        </div>
-                    {/each}
-                </div>
-                <div class="summary-total">
-                    <strong>Total:</strong>
-                    <strong>{formatPrice(subtotal)}</strong>
-                </div>
-            </div>
+            <OrderSummary {cartItems} {subtotal} />
 
-            <!-- Checkout Form -->
             <form on:submit|preventDefault={handleSubmit}>
-                <div class="form-section">
-                    <h3>Dados do Cliente</h3>
-                    
-                    <!-- accessibility-fix: issue-27 - Form validation errors need aria-invalid and aria-describedby -->
-                    <div class="form-group" class:has-error={errors.name}>
-                        <label for="name">
-                            Nome Completo <span class="required">*</span>
-                        </label>
-                        <input
-                            id="name"
-                            type="text"
-                            bind:value={formData.name}
-                            placeholder="Seu nome completo"
-                            required
-                        />
-                        {#if errors.name}
-                            <span class="error-message">{errors.name}</span>
-                        {/if}
-                    </div>
-                    <!-- /accessibility-fix -->
-                </div>
+                <AddressForm bind:formData bind:errors />
 
-                <div class="form-section">
-                    <h3>Endereço de Entrega</h3>
-                    
-                    <div class="form-row">
-                        <div class="form-group flex-2" class:has-error={errors.street}>
-                            <label for="street">
-                                Rua/Avenida <span class="required">*</span>
-                            </label>
-                            <input
-                                id="street"
-                                type="text"
-                                bind:value={formData.street}
-                                placeholder="Nome da rua"
-                                required
-                            />
-                            {#if errors.street}
-                                <span class="error-message">{errors.street}</span>
-                            {/if}
-                        </div>
+                <PaymentSelector bind:paymentMethod={formData.paymentMethod} />
 
-                        <div class="form-group flex-1" class:has-error={errors.number}>
-                            <label for="number">
-                                Número <span class="required">*</span>
-                            </label>
-                            <input
-                                id="number"
-                                type="text"
-                                bind:value={formData.number}
-                                placeholder="Nº"
-                                required
-                            />
-                            {#if errors.number}
-                                <span class="error-message">{errors.number}</span>
-                            {/if}
-                        </div>
-                    </div>
-
-                    <div class="form-group" class:has-error={errors.neighborhood}>
-                        <label for="neighborhood">
-                            Bairro <span class="required">*</span>
-                        </label>
-                        <input
-                            id="neighborhood"
-                            type="text"
-                            bind:value={formData.neighborhood}
-                            placeholder="Nome do bairro"
-                            required
-                        />
-                        {#if errors.neighborhood}
-                            <span class="error-message">{errors.neighborhood}</span>
-                        {/if}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reference">
-                            Ponto de Referência <span class="optional">(opcional)</span>
-                        </label>
-                        <input
-                            id="reference"
-                            type="text"
-                            bind:value={formData.reference}
-                            placeholder="Ex: Próximo ao posto de gasolina"
-                        />
-                    </div>
-                </div>
-
-                <!-- accessibility-fix: issue-28 - Payment radio buttons need fieldset/legend -->
-                <div class="form-section">
-                    <h3>Forma de Pagamento</h3>
-                    
-                    <div class="payment-options">
-                        <label class="radio-label">
-                            <input
-                                type="radio"
-                                name="payment"
-                                value="Dinheiro"
-                                bind:group={formData.paymentMethod}
-                            />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text">
-                                <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
-                                Dinheiro
-                            </span>
-                        </label>
-
-                        <label class="radio-label">
-                            <input
-                                type="radio"
-                                name="payment"
-                                value="PIX"
-                                bind:group={formData.paymentMethod}
-                            />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text">
-                                <i class="fas fa-qrcode" aria-hidden="true"></i>
-                                PIX
-                            </span>
-                        </label>
-
-                        <label class="radio-label">
-                            <input
-                                type="radio"
-                                name="payment"
-                                value="Cartão"
-                                bind:group={formData.paymentMethod}
-                            />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text">
-                                <i class="fas fa-credit-card" aria-hidden="true"></i>
-                                Cartão
-                            </span>
-                        </label>
-                    </div>
-                </div>
-                <!-- /accessibility-fix -->
-
-                <!-- accessibility-fix: issue-30 - Textarea missing proper label -->
                 <div class="form-section">
                     <h3>Observações <span class="optional">(opcional)</span></h3>
-                    
                     <div class="form-group">
                         <textarea
                             id="observations"
@@ -339,7 +189,6 @@
                         ></textarea>
                     </div>
                 </div>
-                <!-- /accessibility-fix -->
 
                 {#if validationError}
                     <div class="validation-error" role="alert">
@@ -352,7 +201,6 @@
                     <button type="button" class="btn-cancel" on:click={onClose}>
                         Cancelar
                     </button>
-                    <!-- accessibility-fix: issue-31 - Submit button state not announced -->
                     <button type="submit" class="btn-submit" disabled={isSubmitting}>
                         {#if isSubmitting}
                             <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
@@ -362,7 +210,6 @@
                             Finalizar no WhatsApp
                         {/if}
                     </button>
-                    <!-- /accessibility-fix -->
                 </div>
             </form>
         </div>
@@ -433,45 +280,6 @@
         overflow-y: auto;
     }
 
-    .order-summary {
-        background: var(--gray-50);
-        border-radius: 12px;
-        padding: var(--spacing-4);
-        margin-bottom: var(--spacing-6);
-    }
-
-    .order-summary h3 {
-        margin: 0 0 var(--spacing-3) 0;
-        font-size: var(--font-size-lg);
-        font-weight: 600;
-        color: var(--gray-900);
-    }
-
-    .summary-items {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-2);
-        margin-bottom: var(--spacing-3);
-    }
-
-    .summary-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: var(--font-size-sm);
-        color: var(--gray-700);
-    }
-
-    .summary-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: var(--spacing-3);
-        border-top: 2px solid var(--gray-200);
-        font-size: var(--font-size-lg);
-        color: var(--gray-900);
-    }
-
     .form-section {
         margin-bottom: var(--spacing-6);
     }
@@ -487,38 +295,12 @@
         margin-bottom: var(--spacing-4);
     }
 
-    .form-row {
-        display: flex;
-        gap: var(--spacing-3);
-    }
-
-    .form-row .flex-1 {
-        flex: 1;
-    }
-
-    .form-row .flex-2 {
-        flex: 2;
-    }
-
-    label {
-        display: block;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-2);
-        font-size: var(--font-size-sm);
-    }
-
-    .required {
-        color: var(--danger-color);
-    }
-
     .optional {
         color: var(--gray-500);
         font-weight: 400;
         font-size: var(--font-size-xs);
     }
 
-    input[type="text"],
     textarea {
         width: 100%;
         padding: var(--spacing-3);
@@ -527,98 +309,13 @@
         font-family: inherit;
         font-size: var(--font-size-sm);
         transition: border-color 0.2s;
-    }
-
-    input[type="text"]:focus,
-    textarea:focus {
-        outline: none;
-        border-color: var(--secondary-color);
-    }
-
-    .has-error input[type="text"] {
-        border-color: var(--danger-color);
-    }
-
-    .error-message {
-        display: block;
-        margin-top: var(--spacing-1);
-        color: var(--danger-color);
-        font-size: var(--font-size-xs);
-        font-weight: 500;
-    }
-
-    textarea {
         resize: vertical;
         min-height: 80px;
     }
 
-    .payment-options {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-3);
-    }
-
-    .radio-label {
-        display: flex;
-        align-items: center;
-        padding: var(--spacing-3);
-        border: 2px solid var(--gray-300);
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-        position: relative;
-    }
-
-    .radio-label:hover {
+    textarea:focus {
+        outline: none;
         border-color: var(--secondary-color);
-        background: var(--gray-50);
-    }
-
-    .radio-label input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .radio-custom {
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--gray-400);
-        border-radius: 50%;
-        margin-right: var(--spacing-3);
-        position: relative;
-        flex-shrink: 0;
-        transition: all 0.2s;
-    }
-
-    .radio-label input[type="radio"]:checked ~ .radio-custom {
-        border-color: var(--secondary-color);
-    }
-
-    .radio-label input[type="radio"]:checked ~ .radio-custom::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 10px;
-        height: 10px;
-        background: var(--secondary-color);
-        border-radius: 50%;
-    }
-
-    .radio-text {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-2);
-        font-weight: 500;
-        color: var(--gray-700);
-    }
-
-    .radio-text i {
-        color: var(--secondary-color);
-        font-size: var(--font-size-lg);
     }
 
     .validation-error {
@@ -696,10 +393,6 @@
 
         .modal-body {
             padding: var(--spacing-4);
-        }
-
-        .form-row {
-            flex-direction: column;
         }
 
         .form-actions {
