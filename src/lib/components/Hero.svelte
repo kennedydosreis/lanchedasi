@@ -27,7 +27,7 @@
                 <i class="fab fa-whatsapp" aria-hidden="true"></i>
                 Pedir pelo WhatsApp
             </button>
-            <a href="#menu" class="btn-menu">
+            <a href="/cardapio" class="btn-menu" data-sveltekit-preload-data>
                 <i class="fas fa-utensils" aria-hidden="true"></i>
                 Ver Cardápio
             </a>
