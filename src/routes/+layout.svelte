@@ -21,7 +21,7 @@
 
 <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
 <Header />
-<main id="conteudo-principal" role="main" aria-label="Conteúdo principal">
+<main id="conteudo-principal" aria-label="Conteúdo principal">
     <slot />
 </main>
 <Cart />

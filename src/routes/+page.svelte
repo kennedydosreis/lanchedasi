@@ -3,9 +3,11 @@
     import Hero from '$lib/components/Hero.svelte';
     import MenuSection from '$lib/components/Menu/MenuSection.svelte';
     import Contact from '$lib/components/Contact.svelte';
+
+    export let data;
 </script>
 
 <MetaTags />
 <Hero />
-<MenuSection />
+<MenuSection menuData={data.menuData} />
 <Contact />
