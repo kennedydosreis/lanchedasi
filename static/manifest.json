@@ -1,0 +1,59 @@
+{
+  "name": "Lanche da Si - Os Melhores Lanches de Manaus",
+  "short_name": "Lanche da Si",
+  "description": "Faça seu pedido online de forma simples e rápida. Os melhores lanches da cidade com entrega rápida em Manaus.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "categories": ["food", "shopping"],
+  "icons": [
+    {
+      "src": "/logo-lanche-da-si.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Ver Cardápio",
+      "short_name": "Cardápio",
+      "url": "/#menu",
+      "icons": []
+    },
+    {
+      "name": "Pedir pelo WhatsApp",
+      "short_name": "Pedir",
+      "url": "https://wa.me/5592993525884?text=Ol%C3%A1!%20Gostaria%20de%20fazer%20um%20pedido%20no%20Lanche%20da%20Si.",
+      "icons": []
+    }
+  ]
+}
