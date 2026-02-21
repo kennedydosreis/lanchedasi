@@ -1,6 +1,51 @@
 import { findItemById } from './loadMenu.js';
+import type { MenuItem, MenuData } from '$lib/types/menu';
 
-export function validateItem(item, menuData) {
+/**
+ * Interface para item no carrinho
+ */
+export interface CartItem extends MenuItem {
+  quantity: number;
+}
+
+/**
+ * Interface para resultado de validação de item
+ */
+export interface ValidationResult {
+  valid: boolean;
+  error: string | null;
+  validatedItem: CartItem | null;
+}
+
+/**
+ * Interface para resultado de recálculo do carrinho
+ */
+export interface RecalculateResult {
+  items: CartItem[];
+  invalid: CartItem[];
+  errors: string[] | null;
+}
+
+/**
+ * Interface para resultado de validação de checkout
+ */
+export interface CheckoutValidationResult {
+  valid: boolean;
+  errors: string[] | null;
+  validatedCart: CartItem[];
+  total: number;
+  invalidItems?: CartItem[];
+}
+
+/**
+ * Interface para resultado de truncamento de mensagem
+ */
+export interface TruncateResult {
+  message: string;
+  truncated: boolean;
+}
+
+export function validateItem(item: Partial<CartItem>, menuData: MenuData): ValidationResult {
     if (!item?.id) {
         return { valid: false, error: 'Item inválido: ID ausente', validatedItem: null };
     }
@@ -10,16 +55,13 @@ export function validateItem(item, menuData) {
         return { valid: false, error: `Item não encontrado no cardápio: ${item.id}`, validatedItem: null };
     }
 
-    const validatedItem = {
+    const validatedItem: CartItem = {
         ...item,
-        price: menuItem.price,
-        name: menuItem.name,
-        description: menuItem.description,
-        image: menuItem.image,
-        category: menuItem.category
+        ...menuItem,
+        quantity: item.quantity || 1
     };
 
-    if (item.price !== menuItem.price) {
+    if (item.price !== undefined && item.price !== menuItem.price) {
         console.warn(`Price mismatch for ${item.id}: cart=${item.price}, menu=${menuItem.price}`);
         return { valid: false, error: `Preço incorreto para ${menuItem.name}`, validatedItem };
     }
@@ -30,48 +72,52 @@ export function validateItem(item, menuData) {
 const MIN_QTY = 1;
 const MAX_QTY = 10;
 
-export function sanitizeQuantity(qty) {
+export function sanitizeQuantity(qty: number | string): number {
     const num = Number(qty);
     if (isNaN(num)) return MIN_QTY;
     if (!isFinite(num)) return num > 0 ? MAX_QTY : MIN_QTY;
     return Math.floor(Math.min(Math.max(num, MIN_QTY), MAX_QTY));
 }
 
-export function recalculateCart(cartItems, menuData) {
+export function recalculateCart(cartItems: Partial<CartItem>[], menuData: MenuData): RecalculateResult {
     if (!Array.isArray(cartItems)) {
         return { items: [], invalid: [], errors: ['Carrinho inválido'] };
     }
 
-    const validItems = [];
-    const invalidItems = [];
-    const errors = [];
+    const validItems: CartItem[] = [];
+    const invalidItems: CartItem[] = [];
+    const errors: string[] = [];
 
     for (const item of cartItems) {
-        const safeQuantity = sanitizeQuantity(item.quantity);
+        const safeQuantity = sanitizeQuantity(item.quantity || 1);
         const validation = validateItem({ ...item, quantity: safeQuantity }, menuData);
 
-        if (validation.valid || validation.validatedItem) {
+        if (validation.valid && validation.validatedItem) {
             validItems.push({ ...validation.validatedItem, quantity: safeQuantity });
-            if (!validation.valid) {
-                errors.push(`${validation.error} - preço corrigido`);
-            }
+        } else if (validation.validatedItem) {
+            validItems.push({ ...validation.validatedItem, quantity: safeQuantity });
+            errors.push(`${validation.error} - preço corrigido`);
         } else {
-            invalidItems.push(item);
-            errors.push(validation.error);
+            if (validation.validatedItem) {
+                invalidItems.push(validation.validatedItem);
+            }
+            if (validation.error) {
+                errors.push(validation.error);
+            }
         }
     }
 
     return { items: validItems, invalid: invalidItems, errors: errors.length ? errors : null };
 }
 
-export function calculateTotal(cartItems) {
+export function calculateTotal(cartItems: CartItem[]): number {
     if (!Array.isArray(cartItems)) return 0;
     return cartItems.reduce((total, item) => {
         return total + (Number(item.price) || 0) * sanitizeQuantity(item.quantity);
     }, 0);
 }
 
-export function truncateWhatsAppMessage(message, maxChars = 1800) {
+export function truncateWhatsAppMessage(message: string, maxChars: number = 1800): TruncateResult {
     if (!message || typeof message !== 'string') {
         return { message: '', truncated: false };
     }
@@ -91,7 +137,7 @@ export function truncateWhatsAppMessage(message, maxChars = 1800) {
     };
 }
 
-export function validateCartForCheckout(cartItems, menuData) {
+export function validateCartForCheckout(cartItems: Partial<CartItem>[], menuData: MenuData): CheckoutValidationResult {
     if (!cartItems?.length) {
         return { valid: false, errors: ['Carrinho vazio'], validatedCart: [], total: 0 };
     }

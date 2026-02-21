@@ -8,7 +8,7 @@ import {
     calculateTotal,
     truncateWhatsAppMessage,
     validateCartForCheckout
-} from '../utils/CartValidator.js';
+} from '../utils/CartValidator.ts';
 
 describe('cart store', () => {
     beforeEach(() => {

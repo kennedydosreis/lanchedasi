@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { validateCartForCheckout, truncateWhatsAppMessage } from '$lib/utils/CartValidator.js';
+    import { validateCartForCheckout, truncateWhatsAppMessage } from '$lib/utils/CartValidator.ts';
     import { loadMenuData } from '$lib/utils/loadMenu.js';
 
     export let cartItems = [];
