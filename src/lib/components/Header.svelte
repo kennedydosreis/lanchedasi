@@ -1,5 +1,6 @@
 <script>
     import { base } from '$app/paths';
+    import { page } from '$app/stores';
 
     /** @type {HTMLDivElement} */
     let scrollIndicator;
@@ -28,15 +29,13 @@
     }
 
     const navItems = [
-        { href: '#populares', icon: 'fas fa-fire', label: 'Populares' },
-        { href: '#combos', icon: 'fas fa-hamburger', label: 'Combos' },
-        { href: '#sanduiches', icon: 'fas fa-bread-slice', label: 'Sanduíches' },
-        { href: '#kikao', icon: 'fas fa-hotdog', label: 'Kikões' },
-        { href: '#porcoes', icon: 'fas fa-drumstick-bite', label: 'Porções' },
-        { href: '#pratos', icon: 'fas fa-utensils', label: 'Pratos' },
-        { href: '#bebidas', icon: 'fas fa-wine-glass', label: 'Bebidas' },
-        { href: '#contato', icon: 'fas fa-phone', label: 'Contato' }
+        { href: '/', icon: 'fas fa-home', label: 'Home' },
+        { href: '/cardapio', icon: 'fas fa-utensils', label: 'Cardápio' },
+        { href: '/sobre', icon: 'fas fa-info-circle', label: 'Sobre' },
+        { href: '/contato', icon: 'fas fa-phone', label: 'Contato' }
     ];
+
+    $: currentPath = $page.url.pathname;
 </script>
 
 <div class="scroll-indicator" bind:this={scrollIndicator}></div>
@@ -45,7 +44,7 @@
     <div class="container">
         <nav class="nav">
             <div class="nav-brand">
-                <a href="#inicio" class="brand-logo-link">
+                <a href="/" class="brand-logo-link">
                     <img
                         src="{base}/logo-lanche-da-si.png"
                         alt="Logo Lanche da Si"
@@ -62,7 +61,13 @@
 
             <nav class="nav-links" id="nav-links" class:active={isMobileMenuOpen} aria-label="Menu principal">
                 {#each navItems as item}
-                    <a href={item.href} class="nav-link" on:click={closeMobileMenu}>
+                    <a 
+                        href={item.href} 
+                        class="nav-link" 
+                        class:active={currentPath === item.href}
+                        on:click={closeMobileMenu}
+                        data-sveltekit-preload-data
+                    >
                         <i class={item.icon} aria-hidden="true"></i>
                         <span>{item.label}</span>
                     </a>
@@ -183,12 +188,31 @@
         padding: var(--spacing-2) var(--spacing-3);
         border-radius: 8px;
         white-space: nowrap;
+        position: relative;
     }
 
     .nav-link:hover {
         color: var(--secondary-color);
         background: var(--gray-50);
         transform: translateY(-1px);
+    }
+
+    .nav-link.active {
+        color: var(--secondary-color);
+        background: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 2px;
+        background: var(--secondary-color);
+        border-radius: 2px;
     }
 
     .nav-link i {
@@ -245,6 +269,10 @@
 
         .nav-link:last-child {
             border-bottom: none;
+        }
+
+        .nav-link.active::after {
+            display: none;
         }
 
         .nav-mobile-toggle {
