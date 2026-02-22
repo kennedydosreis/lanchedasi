@@ -1,7 +1,9 @@
 <script>
     import { onMount } from 'svelte';
+    import { GitHubService } from '../../lib/services/GitHubService';
 
     let password = '';
+    let githubToken = '';
     let authenticated = false;
     let loading = false;
     let status = { type: '', message: '' };
@@ -44,13 +46,23 @@
             showStatus('error', 'Preencha os campos obrigatórios.');
             return;
         }
+        if (!githubToken) {
+            showStatus('error', 'Insira o GitHub Token para publicar.');
+            return;
+        }
+
         loading = true;
-        showStatus('info', 'Sincronizando...');
-        setTimeout(() => {
-            showStatus('success', '✅ Cadastrado com sucesso!');
-            loading = false;
+        showStatus('info', 'Publicando no GitHub...');
+
+        const success = await GitHubService.updateMenu(product, githubToken);
+        
+        if (success) {
+            showStatus('success', '✅ Publicado com sucesso! O site atualizará em breve.');
             resetForm();
-        }, 1500);
+        } else {
+            showStatus('error', '❌ Falha ao publicar. Verifique o seu Token.');
+        }
+        loading = false;
     }
 </script>
 
@@ -92,10 +104,13 @@
         {:else}
             <header style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
                 <div>
-                    <h1 style="font-size: 36px; font-weight: 900; color: #0f172a; margin: 0;">Novo Produto</h1>
-                    <p style="color: #64748b; margin: 4px 0 0 0;">Adicione itens ao cardápio</p>
+                    <h1 style="font-size: 36px; font-weight: 900; color: #0f172a; margin: 0;">Gestão de Cardápio</h1>
+                    <p style="color: #64748b; margin: 4px 0 0 0;">Adicione itens em tempo real (Custo Zero)</p>
                 </div>
-                <button style="background: none; border: none; color: #94a3b8; font-weight: 700; cursor: pointer;" on:click={() => authenticated = false}>Sair</button>
+                <div style="text-align: right;">
+                    <button style="background: none; border: none; color: #94a3b8; font-weight: 700; cursor: pointer; margin-bottom: 8px; display: block; width: 100%;" on:click={() => authenticated = false}>Sair</button>
+                    <input type="password" bind:value={githubToken} placeholder="GitHub Token" style="padding: 8px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; width: 150px;" />
+                </div>
             </header>
 
             <div style="display: grid; grid-template-columns: 1fr 340px; gap: 40px;">
