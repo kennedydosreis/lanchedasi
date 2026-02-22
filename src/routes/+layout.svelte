@@ -3,7 +3,30 @@
     import Footer from '$lib/components/Footer.svelte';
     import Cart from '$lib/components/Cart/Cart.svelte';
     import WhatsAppFloat from '$lib/components/WhatsAppFloat.svelte';
+    import LoggerService from '$lib/services/LoggerService';
+    import { onMount } from 'svelte';
     import '../app.css';
+
+    onMount(() => {
+        window.onerror = (message, source, lineno, colno, error) => {
+            LoggerService.error('Global Client Error', {
+                message,
+                source,
+                lineno,
+                colno,
+                error: error?.stack
+            });
+            return false;
+        };
+
+        window.onunhandledrejection = (event) => {
+            LoggerService.error('Unhandled Promise Rejection', {
+                reason: event.reason
+            });
+        };
+
+        LoggerService.info('App layout mounted successfully');
+    });
 </script>
 
 <svelte:head>

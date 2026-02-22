@@ -1,5 +1,7 @@
 <script>
     import { onMount } from 'svelte';
+    import { CheckoutService } from '$lib/services/CheckoutService.js';
+    import { cart } from '$lib/stores/cart';
     import { validateCartForCheckout, truncateWhatsAppMessage } from '$lib/utils/CartValidator.ts';
     import { loadMenuData } from '$lib/utils/loadMenu.js';
 
@@ -12,58 +14,30 @@
     let menuData = null;
     let formData = {
         name: '',
-        street: '',
-        number: '',
-        neighborhood: '',
-        reference: '',
-        observations: '',
-        paymentMethod: 'PIX'
+        phone: '',
+        address: '',
+        paymentMethod: 'pix',
+        change: '',
+        observations: ''
     };
 
-    let errors = {
-        name: '',
-        street: '',
-        number: '',
-        neighborhood: ''
-    };
-
+    let errors = {};
     let isSubmitting = false;
     let validationError = '';
 
     onMount(async () => {
+        // Carregar dados salvos do cliente
+        const savedInfo = CheckoutService.loadCustomerInfo();
+        if (savedInfo) {
+            formData = { ...formData, ...savedInfo };
+        }
+
         try {
             menuData = await loadMenuData();
         } catch (err) {
             console.error('Error loading menu for checkout:', err);
         }
     });
-
-    function validateForm() {
-        let isValid = true;
-        errors = { name: '', street: '', number: '', neighborhood: '' };
-
-        if (!formData.name.trim()) {
-            errors.name = 'Nome é obrigatório';
-            isValid = false;
-        }
-
-        if (!formData.street.trim()) {
-            errors.street = 'Rua/Avenida é obrigatória';
-            isValid = false;
-        }
-
-        if (!formData.number.trim()) {
-            errors.number = 'Número é obrigatório';
-            isValid = false;
-        }
-
-        if (!formData.neighborhood.trim()) {
-            errors.neighborhood = 'Bairro é obrigatório';
-            isValid = false;
-        }
-
-        return isValid;
-    }
 
     function formatPrice(price) {
         return price.toLocaleString('pt-BR', {
@@ -72,38 +46,9 @@
         });
     }
 
-    function buildWhatsAppMessage(validatedCart, total) {
-        let message = "🍔 *PEDIDO - Lanche da Si*\n\n";
-        
-        message += `*Cliente:* ${formData.name}\n`;
-        
-        message += `*Endereço:* ${formData.street}, ${formData.number}, ${formData.neighborhood}`;
-        if (formData.reference) {
-            message += `\n*Referência:* ${formData.reference}`;
-        }
-        message += "\n";
-        
-        message += `*Pagamento:* ${formData.paymentMethod}\n\n`;
-        
-        message += "*Itens:*\n";
-        validatedCart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
-            message += `• ${item.quantity}x ${item.name} - ${formatPrice(itemTotal)}\n`;
-        });
-        
-        message += `\n*TOTAL: ${formatPrice(total)}*\n`;
-        
-        if (formData.observations.trim()) {
-            message += `\n*Obs:* ${formData.observations}`;
-        }
-
-        return message;
-    }
-
     async function handleSubmit() {
-        if (!validateForm()) {
-            return;
-        }
+        validationError = '';
+        errors = {};
 
         if (!menuData) {
             validationError = 'Erro ao carregar dados do cardápio. Tente novamente.';
@@ -111,39 +56,30 @@
         }
 
         isSubmitting = true;
-        validationError = '';
 
         try {
-            // Validate cart with menu data
-            const validation = validateCartForCheckout(cartItems, menuData);
-
-            if (!validation.valid) {
-                validationError = validation.errors.join(', ');
+            // 1. Validação estrutural e lógica de negócio via Service (Zod)
+            // Note: CheckoutService.processOrder já lida com a validação do Schema e LocalStorage
+            const whatsappUrl = await CheckoutService.processOrder(formData);
+            
+            // 2. Validação de integridade do carrinho (legado mantido para segurança)
+            const cartValidation = validateCartForCheckout(cartItems, menuData);
+            if (!cartValidation.valid) {
+                validationError = cartValidation.errors.join(', ');
                 isSubmitting = false;
                 return;
             }
 
-            // Build WhatsApp message
-            const message = buildWhatsAppMessage(validation.validatedCart, validation.total);
-            
-            // Truncate if needed
-            const { message: finalMessage, truncated } = truncateWhatsAppMessage(message);
-
-            if (truncated) {
-                console.warn('Message was truncated to fit WhatsApp limits');
-            }
-
-            // Open WhatsApp
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(finalMessage)}`;
+            // 3. Abrir WhatsApp (URL gerada pelo Service)
             window.open(whatsappUrl, '_blank');
 
-            // Close modal and notify parent
+            // 4. Finalizar
             onConfirm();
             onClose();
 
         } catch (error) {
             console.error('Error during checkout:', error);
-            validationError = 'Erro ao processar pedido. Tente novamente.';
+            validationError = error.message || 'Erro ao processar pedido.';
         } finally {
             isSubmitting = false;
         }
@@ -158,7 +94,6 @@
     $: subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 </script>
 
-<!-- accessibility-fix: issue-26 - Focus management and trap needed -->
 <div class="modal-overlay" on:click={onClose} on:keydown={handleKeydown} role="presentation">
     <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div class="modal-content" on:click|stopPropagation on:keydown role="dialog" aria-labelledby="checkout-title" aria-modal="true">
@@ -176,8 +111,8 @@
                 <div class="summary-items">
                     {#each cartItems as item}
                         <div class="summary-item">
-                            <span>{item.quantity}x {item.name}</span>
-                            <span>{formatPrice(item.price * item.quantity)}</span>
+                            <span>{item.quantity}x {item.nome || item.name}</span>
+                            <span>{formatPrice((item.preco || item.price) * item.quantity)}</span>
                         </div>
                     {/each}
                 </div>
@@ -190,180 +125,98 @@
             <!-- Checkout Form -->
             <form on:submit|preventDefault={handleSubmit}>
                 <div class="form-section">
-                    <h3>Dados do Cliente</h3>
+                    <h3>Dados de Entrega</h3>
                     
-                    <!-- accessibility-fix: issue-27 - Form validation errors need aria-invalid and aria-describedby -->
-                    <div class="form-group" class:has-error={errors.name}>
-                        <label for="name">
-                            Nome Completo <span class="required">*</span>
-                        </label>
+                    <div class="form-group">
+                        <label for="name">Nome Completo <span class="required">*</span></label>
                         <input
                             id="name"
                             type="text"
                             bind:value={formData.name}
-                            placeholder="Seu nome completo"
+                            placeholder="Como quer ser chamado?"
                             required
                         />
-                        {#if errors.name}
-                            <span class="error-message">{errors.name}</span>
-                        {/if}
-                    </div>
-                    <!-- /accessibility-fix -->
-                </div>
-
-                <div class="form-section">
-                    <h3>Endereço de Entrega</h3>
-                    
-                    <div class="form-row">
-                        <div class="form-group flex-2" class:has-error={errors.street}>
-                            <label for="street">
-                                Rua/Avenida <span class="required">*</span>
-                            </label>
-                            <input
-                                id="street"
-                                type="text"
-                                bind:value={formData.street}
-                                placeholder="Nome da rua"
-                                required
-                            />
-                            {#if errors.street}
-                                <span class="error-message">{errors.street}</span>
-                            {/if}
-                        </div>
-
-                        <div class="form-group flex-1" class:has-error={errors.number}>
-                            <label for="number">
-                                Número <span class="required">*</span>
-                            </label>
-                            <input
-                                id="number"
-                                type="text"
-                                bind:value={formData.number}
-                                placeholder="Nº"
-                                required
-                            />
-                            {#if errors.number}
-                                <span class="error-message">{errors.number}</span>
-                            {/if}
-                        </div>
-                    </div>
-
-                    <div class="form-group" class:has-error={errors.neighborhood}>
-                        <label for="neighborhood">
-                            Bairro <span class="required">*</span>
-                        </label>
-                        <input
-                            id="neighborhood"
-                            type="text"
-                            bind:value={formData.neighborhood}
-                            placeholder="Nome do bairro"
-                            required
-                        />
-                        {#if errors.neighborhood}
-                            <span class="error-message">{errors.neighborhood}</span>
-                        {/if}
                     </div>
 
                     <div class="form-group">
-                        <label for="reference">
-                            Ponto de Referência <span class="optional">(opcional)</span>
-                        </label>
+                        <label for="phone">WhatsApp <span class="required">*</span></label>
                         <input
-                            id="reference"
+                            id="phone"
                             type="text"
-                            bind:value={formData.reference}
-                            placeholder="Ex: Próximo ao posto de gasolina"
+                            bind:value={formData.phone}
+                            placeholder="(92) 99999-9999"
+                            required
                         />
                     </div>
-                </div>
 
-                <!-- accessibility-fix: issue-28 - Payment radio buttons need fieldset/legend -->
-                <div class="form-section">
-                    <h3>Forma de Pagamento</h3>
-                    
-                    <div class="payment-options">
-                        <label class="radio-label">
-                            <input
-                                type="radio"
-                                name="payment"
-                                value="Dinheiro"
-                                bind:group={formData.paymentMethod}
-                            />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text">
-                                <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
-                                Dinheiro
-                            </span>
-                        </label>
-
-                        <label class="radio-label">
-                            <input
-                                type="radio"
-                                name="payment"
-                                value="PIX"
-                                bind:group={formData.paymentMethod}
-                            />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text">
-                                <i class="fas fa-qrcode" aria-hidden="true"></i>
-                                PIX
-                            </span>
-                        </label>
-
-                        <label class="radio-label">
-                            <input
-                                type="radio"
-                                name="payment"
-                                value="Cartão"
-                                bind:group={formData.paymentMethod}
-                            />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text">
-                                <i class="fas fa-credit-card" aria-hidden="true"></i>
-                                Cartão
-                            </span>
-                        </label>
-                    </div>
-                </div>
-                <!-- /accessibility-fix -->
-
-                <!-- accessibility-fix: issue-30 - Textarea missing proper label -->
-                <div class="form-section">
-                    <h3>Observações <span class="optional">(opcional)</span></h3>
-                    
                     <div class="form-group">
+                        <label for="address">Endereço Completo <span class="required">*</span></label>
                         <textarea
-                            id="observations"
-                            bind:value={formData.observations}
-                            placeholder="Ex: Sem cebola, bem passado, etc..."
-                            rows="3"
+                            id="address"
+                            bind:value={formData.address}
+                            placeholder="Rua, número, bairro e ponto de referência"
+                            rows="2"
+                            required
                         ></textarea>
                     </div>
                 </div>
-                <!-- /accessibility-fix -->
+
+                <div class="form-section">
+                    <h3>Pagamento</h3>
+                    
+                    <div class="payment-options">
+                        <label class="radio-label">
+                            <input type="radio" value="pix" bind:group={formData.paymentMethod} />
+                            <span class="radio-custom"></span>
+                            <span class="radio-text"><i class="fas fa-qrcode"></i> PIX</span>
+                        </label>
+
+                        <label class="radio-label">
+                            <input type="radio" value="dinheiro" bind:group={formData.paymentMethod} />
+                            <span class="radio-custom"></span>
+                            <span class="radio-text"><i class="fas fa-money-bill-wave"></i> Dinheiro</span>
+                        </label>
+
+                        {#if formData.paymentMethod === 'dinheiro'}
+                            <div class="form-group mt-2">
+                                <input type="text" bind:value={formData.change} placeholder="Troco para quanto?" />
+                            </div>
+                        {/if}
+
+                        <label class="radio-label">
+                            <input type="radio" value="cartao" bind:group={formData.paymentMethod} />
+                            <span class="radio-custom"></span>
+                            <span class="radio-text"><i class="fas fa-credit-card"></i> Cartão (Maquininha)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Observações <span class="optional">(opcional)</span></h3>
+                    <textarea
+                        id="observations"
+                        bind:value={formData.observations}
+                        placeholder="Ex: Sem cebola, capricha no molho..."
+                        rows="2"
+                    ></textarea>
+                </div>
 
                 {#if validationError}
                     <div class="validation-error" role="alert">
-                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                        <i class="fas fa-exclamation-triangle"></i>
                         {validationError}
                     </div>
                 {/if}
 
                 <div class="form-actions">
-                    <button type="button" class="btn-cancel" on:click={onClose}>
-                        Cancelar
-                    </button>
-                    <!-- accessibility-fix: issue-31 - Submit button state not announced -->
+                    <button type="button" class="btn-cancel" on:click={onClose}>Voltar</button>
                     <button type="submit" class="btn-submit" disabled={isSubmitting}>
                         {#if isSubmitting}
-                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                            Processando...
+                            <i class="fas fa-spinner fa-spin"></i> Processando...
                         {:else}
-                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                            Finalizar no WhatsApp
+                            <i class="fab fa-whatsapp"></i> Enviar Pedido
                         {/if}
                     </button>
-                    <!-- /accessibility-fix -->
                 </div>
             </form>
         </div>
@@ -371,26 +224,25 @@
 </div>
 
 <style>
+    /* Reaproveitando estilos anteriores com ajustes de UX */
     .modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.7);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 2000;
-        padding: var(--spacing-4);
-        overflow-y: auto;
+        padding: 1rem;
     }
 
     .modal-content {
-        background: var(--white);
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 600px;
+        background: white;
+        border-radius: 20px;
+        max-width: 500px;
         width: 100%;
         max-height: 90vh;
         display: flex;
@@ -399,317 +251,101 @@
     }
 
     .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: var(--spacing-6);
-        border-bottom: 2px solid var(--gray-200);
     }
 
-    .modal-header h2 {
-        margin: 0;
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
-        color: var(--gray-900);
-    }
+    .modal-header h2 { margin: 0; font-size: 1.5rem; }
 
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: var(--font-size-xl);
-        color: var(--gray-500);
-        cursor: pointer;
-        padding: var(--spacing-2);
-        border-radius: 4px;
-        transition: all 0.2s;
-    }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 
-    .close-btn:hover {
-        color: var(--gray-700);
-        background: var(--gray-100);
-    }
+    .modal-body { padding: 1.5rem; overflow-y: auto; }
 
-    .modal-body {
-        padding: var(--spacing-6);
-        overflow-y: auto;
-    }
+    .order-summary { background: #f9f9f9; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; }
 
-    .order-summary {
-        background: var(--gray-50);
-        border-radius: 12px;
-        padding: var(--spacing-4);
-        margin-bottom: var(--spacing-6);
-    }
+    .summary-item { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
 
-    .order-summary h3 {
-        margin: 0 0 var(--spacing-3) 0;
-        font-size: var(--font-size-lg);
-        font-weight: 600;
-        color: var(--gray-900);
-    }
+    .summary-total { border-top: 1px solid #ddd; padding-top: 0.5rem; margin-top: 0.5rem; display: flex; justify-content: space-between; font-size: 1.1rem; }
 
-    .summary-items {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-2);
-        margin-bottom: var(--spacing-3);
-    }
+    .form-section { margin-bottom: 1.5rem; }
 
-    .summary-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: var(--font-size-sm);
-        color: var(--gray-700);
-    }
+    .form-section h3 { font-size: 1rem; margin-bottom: 1rem; color: #333; }
 
-    .summary-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: var(--spacing-3);
-        border-top: 2px solid var(--gray-200);
-        font-size: var(--font-size-lg);
-        color: var(--gray-900);
-    }
+    .form-group { margin-bottom: 1rem; }
 
-    .form-section {
-        margin-bottom: var(--spacing-6);
-    }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
 
-    .form-section h3 {
-        margin: 0 0 var(--spacing-4) 0;
-        font-size: var(--font-size-lg);
-        font-weight: 600;
-        color: var(--gray-900);
-    }
-
-    .form-group {
-        margin-bottom: var(--spacing-4);
-    }
-
-    .form-row {
-        display: flex;
-        gap: var(--spacing-3);
-    }
-
-    .form-row .flex-1 {
-        flex: 1;
-    }
-
-    .form-row .flex-2 {
-        flex: 2;
-    }
-
-    label {
-        display: block;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: var(--spacing-2);
-        font-size: var(--font-size-sm);
-    }
-
-    .required {
-        color: var(--danger-color);
-    }
-
-    .optional {
-        color: var(--gray-500);
-        font-weight: 400;
-        font-size: var(--font-size-xs);
-    }
-
-    input[type="text"],
-    textarea {
+    input[type="text"], textarea {
         width: 100%;
-        padding: var(--spacing-3);
-        border: 2px solid var(--gray-300);
-        border-radius: 8px;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
         font-family: inherit;
-        font-size: var(--font-size-sm);
-        transition: border-color 0.2s;
     }
 
-    input[type="text"]:focus,
-    textarea:focus {
-        outline: none;
-        border-color: var(--secondary-color);
-    }
+    .required { color: #e11d48; }
 
-    .has-error input[type="text"] {
-        border-color: var(--danger-color);
-    }
-
-    .error-message {
-        display: block;
-        margin-top: var(--spacing-1);
-        color: var(--danger-color);
-        font-size: var(--font-size-xs);
-        font-weight: 500;
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 80px;
-    }
-
-    .payment-options {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-3);
-    }
+    .payment-options { display: flex; flex-direction: column; gap: 0.8rem; }
 
     .radio-label {
         display: flex;
         align-items: center;
-        padding: var(--spacing-3);
-        border: 2px solid var(--gray-300);
-        border-radius: 8px;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
         cursor: pointer;
-        transition: all 0.2s;
-        position: relative;
-    }
-
-    .radio-label:hover {
-        border-color: var(--secondary-color);
-        background: var(--gray-50);
-    }
-
-    .radio-label input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
     }
 
     .radio-custom {
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--gray-400);
+        width: 18px;
+        height: 18px;
+        border: 2px solid #ddd;
         border-radius: 50%;
-        margin-right: var(--spacing-3);
-        position: relative;
-        flex-shrink: 0;
-        transition: all 0.2s;
+        margin-right: 0.8rem;
     }
 
-    .radio-label input[type="radio"]:checked ~ .radio-custom {
-        border-color: var(--secondary-color);
+    input[type="radio"]:checked + .radio-custom {
+        border-color: #25d366;
+        background: #25d366;
+        box-shadow: inset 0 0 0 3px white;
     }
 
-    .radio-label input[type="radio"]:checked ~ .radio-custom::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 10px;
-        height: 10px;
-        background: var(--secondary-color);
-        border-radius: 50%;
-    }
+    input[type="radio"] { display: none; }
 
-    .radio-text {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-2);
-        font-weight: 500;
-        color: var(--gray-700);
-    }
-
-    .radio-text i {
-        color: var(--secondary-color);
-        font-size: var(--font-size-lg);
-    }
+    .radio-text { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
 
     .validation-error {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-2);
-        padding: var(--spacing-3);
-        background: #fef2f2;
-        border: 2px solid #fecaca;
-        border-radius: 8px;
-        color: #dc2626;
-        font-size: var(--font-size-sm);
-        margin-bottom: var(--spacing-4);
+        background: #fff1f2;
+        color: #e11d48;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
     }
 
-    .form-actions {
-        display: flex;
-        gap: var(--spacing-3);
-        padding-top: var(--spacing-4);
-        border-top: 2px solid var(--gray-200);
-    }
+    .form-actions { display: flex; gap: 1rem; margin-top: 1rem; }
 
-    .btn-cancel,
-    .btn-submit {
+    .btn-cancel, .btn-submit {
         flex: 1;
-        padding: var(--spacing-4);
+        padding: 1rem;
         border-radius: 12px;
-        font-size: var(--font-size-base);
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         border: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--spacing-2);
-        transition: all 0.3s;
+        gap: 0.5rem;
     }
 
-    .btn-cancel {
-        background: var(--gray-200);
-        color: var(--gray-700);
-    }
+    .btn-cancel { background: #eee; }
 
-    .btn-cancel:hover {
-        background: var(--gray-300);
-    }
+    .btn-submit { background: #25d366; color: white; }
 
-    .btn-submit {
-        background: #25d366;
-        color: var(--white);
-    }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .btn-submit:hover:not(:disabled) {
-        background: #22c55e;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
-    }
-
-    .btn-submit:disabled {
-        background: var(--gray-400);
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
-
-    @media (max-width: 768px) {
-        .modal-content {
-            max-height: 95vh;
-            border-radius: 16px 16px 0 0;
-            margin-top: auto;
-        }
-
-        .modal-header {
-            padding: var(--spacing-4);
-        }
-
-        .modal-body {
-            padding: var(--spacing-4);
-        }
-
-        .form-row {
-            flex-direction: column;
-        }
-
-        .form-actions {
-            flex-direction: column;
-        }
-
-        .btn-cancel,
-        .btn-submit {
-            width: 100%;
-        }
-    }
+    .mt-2 { margin-top: 0.5rem; }
 </style>
