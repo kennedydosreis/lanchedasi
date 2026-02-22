@@ -76,7 +76,7 @@ export function sanitizeQuantity(qty: number | string): number {
     const num = Number(qty);
     if (isNaN(num)) return MIN_QTY;
     if (!isFinite(num)) return num > 0 ? MAX_QTY : MIN_QTY;
-    return Math.floor(Math.min(Math.max(num, MIN_QTY), MAX_QTY));
+    return Math.max(MIN_QTY, Math.min(MAX_QTY, Math.floor(num)));
 }
 
 export function recalculateCart(cartItems: Partial<CartItem>[], menuData: MenuData): RecalculateResult {
