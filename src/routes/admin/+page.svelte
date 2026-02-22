@@ -75,37 +75,52 @@
         
         {#if !authenticated}
             <!-- Login Card -->
-            <div class="max-w-md mx-auto bg-white rounded-3xl shadow-2xl shadow-slate-200 p-8 border border-slate-100">
-                <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
-                        🔐
-                    </div>
-                    <h1 class="text-2xl font-bold text-slate-800">Painel do Dono</h1>
-                    <p class="text-slate-500 text-sm">Acesse para gerenciar o Lanche da Si</p>
-                </div>
+            <div class="min-h-[70vh] flex items-center justify-center">
+                <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 border border-slate-100 relative overflow-hidden">
+                    <!-- Decorative background element -->
+                    <div class="absolute -top-24 -right-24 w-48 h-48 bg-orange-100 rounded-full blur-3xl opacity-50"></div>
+                    <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-orange-50 rounded-full blur-3xl opacity-50"></div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Chave de Acesso</label>
-                        <input 
-                            type="password" 
-                            bind:value={password} 
-                            placeholder="••••••••" 
-                            class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all"
-                            on:keydown={(e) => e.key === 'Enter' && login()}
-                        />
+                    <div class="relative z-10">
+                        <div class="text-center mb-10">
+                            <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-3xl shadow-xl shadow-orange-200 animate-bounce-slow">
+                                🔐
+                            </div>
+                            <h1 class="text-3xl font-black text-slate-800 tracking-tight">Acesso Restrito</h1>
+                            <p class="text-slate-500 mt-2 font-medium">Lanche da Si • Gestão</p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="space-y-3">
+                                <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Senha do Proprietário</label>
+                                <input 
+                                    type="password" 
+                                    bind:value={password} 
+                                    placeholder="••••••••" 
+                                    class="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] focus:border-orange-500 focus:bg-white focus:outline-none transition-all text-center text-lg font-bold tracking-widest placeholder:text-slate-300 placeholder:font-normal placeholder:tracking-normal"
+                                    on:keydown={(e) => e.key === 'Enter' && login()}
+                                />
+                            </div>
+                            
+                            <button 
+                                on:click={login}
+                                class="w-full bg-slate-900 hover:bg-black text-white font-black py-5 rounded-[1.5rem] shadow-2xl shadow-slate-200 transition-all active:scale-[0.97] flex items-center justify-center gap-3 group"
+                            >
+                                <span>Entrar no Painel</span>
+                                <span class="group-hover:translate-x-1 transition-transform">→</span>
+                            </button>
+                            
+                            {#if status.type === 'error'}
+                                <div class="bg-red-50 text-red-500 py-3 rounded-2xl text-center text-sm font-bold animate-shake">
+                                    ⚠️ {status.message}
+                                </div>
+                            {/if}
+                        </div>
+
+                        <div class="mt-12 text-center border-t border-slate-50 pt-8">
+                            <p class="text-[10px] text-slate-300 font-bold uppercase tracking-widest">Acesso seguro • Custo Zero</p>
+                        </div>
                     </div>
-                    
-                    <button 
-                        on:click={login}
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-orange-200 transition-all active:scale-[0.98]"
-                    >
-                        Entrar no Painel
-                    </button>
-                    
-                    {#if status.type === 'error'}
-                        <p class="text-center text-red-500 text-sm font-medium">{status.message}</p>
-                    {/if}
                 </div>
             </div>
         {:else}
@@ -251,13 +266,27 @@
         @apply border-orange-500 bg-orange-50 text-orange-600;
     }
 
-    /* Utilitários tailwind via classes custom para evitar inchaço se não configurado */
+    :global(.animate-bounce-slow) {
+        animation: bounce 3s infinite;
+    }
+
     :global(.animate-spin) {
         animation: spin 1s linear infinite;
+    }
+
+    :global(.animate-shake) {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
 
     @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
+    }
+
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 </style>
