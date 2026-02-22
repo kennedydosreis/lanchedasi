@@ -54,155 +54,114 @@
     }
 </script>
 
-<!-- v1.0.1 - Forcing Tailwind refresh -->
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
-    <div class="max-w-4xl mx-auto">
-        
+<div class="admin-view">
+    <div class="container">
         {#if !authenticated}
-            <!-- Login Card -->
-            <div class="flex items-center justify-center py-12">
-                <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-10 border border-gray-100">
-                    <div class="text-center mb-10">
-                        <div class="w-20 h-20 bg-orange-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl shadow-lg">
-                            🔐
-                        </div>
-                        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
-                        <p class="text-gray-500 mt-2 font-medium">Acesso Restrito • Lanche da Si</p>
-                    </div>
+            <div class="login-wrapper">
+                <div class="login-card">
+                    <div class="lock-icon">🔐</div>
+                    <h1>Acesso Restrito</h1>
+                    <p>Lanche da Si • Gestão</p>
 
-                    <div class="space-y-6">
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold uppercase tracking-widest text-gray-400">Senha de Acesso</label>
-                            <input 
-                                type="password" 
-                                bind:value={password} 
-                                placeholder="••••••••" 
-                                class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:bg-white focus:outline-none transition-all text-center text-xl font-bold tracking-widest"
-                                on:keydown={(e) => e.key === 'Enter' && login()}
-                            />
-                        </div>
-                        
-                        <button 
-                            on:click={login}
-                            class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            Acessar Painel →
-                        </button>
-                        
-                        {#if status.type === 'error'}
-                            <div class="bg-red-50 text-red-500 py-3 rounded-xl text-center text-sm font-bold">
-                                {status.message}
-                            </div>
-                        {/if}
+                    <div class="input-group">
+                        <label>SENHA DO PROPRIETÁRIO</label>
+                        <input type="password" bind:value={password} placeholder="••••••••" on:keydown={(e) => e.key === 'Enter' && login()} />
                     </div>
+                    
+                    <button class="btn-primary" on:click={login}>ENTRAR NO PAINEL</button>
+                    
+                    {#if status.type === 'error'}
+                        <div class="error-msg">{status.message}</div>
+                    {/if}
                 </div>
             </div>
         {:else}
-            <!-- Admin Dashboard -->
-            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+            <header class="admin-header">
                 <div>
-                    <h1 class="text-4xl font-black text-gray-900">Novo Produto</h1>
-                    <p class="text-gray-500 font-medium">Gerencie seu cardápio em tempo real</p>
+                    <h1>Novo Produto</h1>
+                    <p>Adicione itens ao cardápio</p>
                 </div>
-                <button on:click={() => authenticated = false} class="text-sm font-bold text-gray-400 hover:text-red-500 transition-colors">
-                    Sair do Painel
-                </button>
+                <button class="logout-btn" on:click={() => authenticated = false}>Sair</button>
             </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Form Column -->
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-                        <form on:submit|preventDefault={handleSubmit} class="space-y-6">
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-2">
-                                    <label class="text-sm font-bold text-gray-700">ID do Produto</label>
-                                    <input bind:value={product.id} placeholder="ex: x-egg" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all" required />
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-sm font-bold text-gray-700">Categoria</label>
-                                    <select bind:value={product.category} class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all">
-                                        {#each categories as cat}
-                                            <option value={cat.id}>{cat.label}</option>
-                                        {/each}
-                                    </select>
-                                </div>
+            <div class="admin-grid">
+                <div class="form-side">
+                    <form on:submit|preventDefault={handleSubmit} class="card">
+                        <div class="row">
+                            <div class="field">
+                                <label>ID do Produto</label>
+                                <input bind:value={product.id} placeholder="ex: x-egg" required />
                             </div>
-
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold text-gray-700">Nome do Lanche</label>
-                                <input bind:value={product.name} placeholder="Ex: X-Salada Especial" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all" required />
+                            <div class="field">
+                                <label>Categoria</label>
+                                <select bind:value={product.category}>
+                                    {#each categories as cat}
+                                        <option value={cat.id}>{cat.label}</option>
+                                    {/each}
+                                </select>
                             </div>
+                        </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-2">
-                                    <label class="text-sm font-bold text-gray-700">Preço (R$)</label>
-                                    <input type="number" step="0.5" bind:value={product.price} placeholder="0.00" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all" required />
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-sm font-bold text-gray-700">URL da Foto</label>
-                                    <input bind:value={product.image} placeholder="https://link-da-imagem.jpg" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all" />
-                                </div>
+                        <div class="field">
+                            <label>Nome do Lanche</label>
+                            <input bind:value={product.name} placeholder="Ex: X-Salada Especial" required />
+                        </div>
+
+                        <div class="row">
+                            <div class="field">
+                                <label>Preço (R$)</label>
+                                <input type="number" step="0.5" bind:value={product.price} placeholder="0.00" required />
                             </div>
-
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold text-gray-700">Descrição/Ingredientes</label>
-                                <textarea bind:value={product.description} placeholder="Pão, carne, queijo..." class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all h-24 resize-none"></textarea>
+                            <div class="field">
+                                <label>URL da Foto</label>
+                                <input bind:value={product.image} placeholder="https://..." />
                             </div>
+                        </div>
 
-                            <div class="flex gap-4">
-                                <label class="flex-1 text-center py-3 rounded-2xl border-2 font-bold text-xs cursor-pointer transition-all {product.popular ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-gray-100 text-gray-400'}">
-                                    <input type="checkbox" bind:checked={product.popular} class="hidden" />
-                                    ⭐ DESTAQUE
-                                </label>
-                                <label class="flex-1 text-center py-3 rounded-2xl border-2 font-bold text-xs cursor-pointer transition-all {product.disponivel ? 'border-green-500 bg-green-50 text-green-600' : 'border-gray-100 text-gray-400'}">
-                                    <input type="checkbox" bind:checked={product.disponivel} class="hidden" />
-                                    ✅ DISPONÍVEL
-                                </label>
-                            </div>
+                        <div class="field">
+                            <label>Descrição</label>
+                            <textarea bind:value={product.description} placeholder="Pão, carne, queijo..."></textarea>
+                        </div>
 
-                            <button 
-                                type="submit" 
-                                disabled={loading}
-                                class="w-full bg-orange-500 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-orange-600 transition-all disabled:bg-gray-300 flex items-center justify-center gap-2"
-                            >
-                                {loading ? 'Salvando...' : 'PUBLICAR NO CARDÁPIO'}
-                            </button>
+                        <div class="toggles">
+                            <label class="toggle {product.popular ? 'active' : ''}">
+                                <input type="checkbox" bind:checked={product.popular} />
+                                ⭐ DESTAQUE
+                            </label>
+                            <label class="toggle {product.disponivel ? 'active' : ''}">
+                                <input type="checkbox" bind:checked={product.disponivel} />
+                                ✅ DISPONÍVEL
+                            </label>
+                        </div>
 
-                            {#if status.message}
-                                <div class="p-4 rounded-2xl text-center text-sm font-bold {status.type === 'success' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}">
-                                    {status.message}
-                                </div>
-                            {/if}
-                        </form>
-                    </div>
+                        <button type="submit" class="btn-submit" disabled={loading}>
+                            {loading ? 'SALVANDO...' : 'PUBLICAR NO CARDÁPIO'}
+                        </button>
+
+                        {#if status.message}
+                            <div class="status-box {status.type}">{status.message}</div>
+                        {/if}
+                    </form>
                 </div>
 
-                <!-- Preview Column -->
-                <div class="space-y-6">
-                    <h2 class="text-sm font-black uppercase tracking-widest text-gray-400">Prévia no Site</h2>
-                    <div class="bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden sticky top-8">
-                        <div class="aspect-square bg-gray-100 flex items-center justify-center relative">
+                <div class="preview-side">
+                    <h2>Prévia no Site</h2>
+                    <div class="product-preview">
+                        <div class="img-box">
                             {#if product.image}
-                                <img src={product.image} alt="Preview" class="w-full h-full object-cover" />
+                                <img src={product.image} alt="Preview" />
                             {:else}
-                                <span class="text-gray-300 text-6xl">📸</span>
-                            {/if}
-                            {#if product.popular}
-                                <span class="absolute top-4 left-4 bg-yellow-400 text-yellow-900 text-[10px] font-black px-3 py-1 rounded-full uppercase shadow-sm">Mais Pedido</span>
+                                <span class="placeholder">📸</span>
+                            {if product.popular}
+                                <span class="badge">Mais Pedido</span>
                             {/if}
                         </div>
-                        <div class="p-6 space-y-3">
-                            <div class="flex justify-between items-start">
-                                <h3 class="font-bold text-xl text-gray-900 leading-tight">{product.name || 'Nome do Lanche'}</h3>
-                                <span class="text-orange-600 font-black text-lg">R$ {product.price || '0,00'}</span>
+                        <div class="info-box">
+                            <div class="name-row">
+                                <h3>{product.name || 'Nome do Lanche'}</h3>
+                                <span class="price">R$ {product.price || '0,00'}</span>
                             </div>
-                            <p class="text-gray-500 text-sm leading-relaxed">{product.description || 'A descrição aparecerá aqui...'}</p>
-                            <div class="pt-4 border-t border-gray-50 flex items-center justify-between">
-                                <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest">{categories.find(c => c.id === product.category)?.label.split(' ')[1]}</span>
-                                <div class="h-10 w-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">🛒</div>
-                            </div>
+                            <p>{product.description || 'A descrição aparecerá aqui...'}</p>
                         </div>
                     </div>
                 </div>
@@ -210,3 +169,104 @@
         {/if}
     </div>
 </div>
+
+<style>
+    .admin-view {
+        min-height: 100vh;
+        background: #f8fafc;
+        font-family: 'Inter', sans-serif;
+        padding: 40px 0;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+    }
+    .login-card {
+        background: white;
+        padding: 40px;
+        border-radius: 32px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        text-align: center;
+        width: 100%;
+        max-width: 400px;
+    }
+    .lock-icon { font-size: 40px; margin-bottom: 20px; }
+    .login-card h1 { font-size: 24px; color: #1e293b; margin-bottom: 8px; font-weight: 800; }
+    .login-card p { color: #64748b; margin-bottom: 32px; font-size: 14px; }
+    
+    .input-group { text-align: left; margin-bottom: 24px; }
+    .input-group label { display: block; font-size: 10px; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 8px; margin-left: 4px; }
+    .input-group input { 
+        width: 100%; padding: 16px; background: #f1f5f9; border: 2px solid transparent; 
+        border-radius: 16px; font-size: 18px; font-weight: 700; text-align: center;
+        transition: 0.2s;
+    }
+    .input-group input:focus { border-color: #f59e0b; background: white; outline: none; }
+    
+    .btn-primary {
+        width: 100%; background: #0f172a; color: white; border: none; padding: 18px;
+        border-radius: 16px; font-weight: 800; cursor: pointer; transition: 0.2s;
+    }
+    .btn-primary:hover { background: black; transform: translateY(-2px); }
+    
+    .admin-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+    .admin-header h1 { font-size: 32px; font-weight: 900; color: #0f172a; }
+    .admin-header p { color: #64748b; }
+    .logout-btn { background: none; border: none; color: #94a3b8; font-weight: 700; cursor: pointer; }
+    .logout-btn:hover { color: #ef4444; }
+
+    .admin-grid { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
+    @media (max-width: 800px) { .admin-grid { grid-template-columns: 1fr; } }
+
+    .card { background: white; padding: 32px; border-radius: 24px; border: 1px solid #e2e8f0; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .field { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .field label { font-size: 13px; font-weight: 700; color: #475569; }
+    .field input, .field select, .field textarea {
+        padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+        font-size: 15px; transition: 0.2s;
+    }
+    .field input:focus { border-color: #f59e0b; background: white; outline: none; }
+    .field textarea { height: 100px; }
+
+    .toggles { display: flex; gap: 12px; margin-bottom: 30px; }
+    .toggle { 
+        flex: 1; text-align: center; padding: 12px; border: 2px solid #f1f5f9; 
+        border-radius: 12px; font-size: 11px; font-weight: 800; color: #94a3b8;
+        cursor: pointer; transition: 0.2s;
+    }
+    .toggle input { display: none; }
+    .toggle.active { border-color: #f59e0b; color: #f59e0b; background: #fffbeb; }
+
+    .btn-submit {
+        width: 100%; background: #f59e0b; color: white; border: none; padding: 18px;
+        border-radius: 16px; font-weight: 900; cursor: pointer; transition: 0.2s;
+    }
+    .btn-submit:hover { background: #d97706; box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
+    .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+    .preview-side h2 { font-size: 12px; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 16px; }
+    .product-preview { background: white; border-radius: 24px; overflow: hidden; border: 1px solid #e2e8f0; position: sticky; top: 40px; }
+    .img-box { aspect-ratio: 1; background: #f1f5f9; display: flex; align-items: center; justify-content: center; position: relative; }
+    .img-box img { width: 100%; height: 100%; object-cover: cover; }
+    .placeholder { font-size: 48px; }
+    .badge { position: absolute; top: 12px; left: 12px; background: #facc15; color: #854d0e; padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 900; }
+    
+    .info-box { padding: 20px; }
+    .name-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .name-row h3 { font-size: 18px; font-weight: 800; color: #1e293b; }
+    .price { font-weight: 900; color: #f59e0b; font-size: 18px; }
+    .info-box p { color: #64748b; font-size: 14px; line-height: 1.5; }
+
+    .status-box { margin-top: 20px; padding: 12px; border-radius: 12px; text-align: center; font-weight: 700; font-size: 14px; }
+    .status-box.success { background: #f0fdf4; color: #16a34a; }
+    .status-box.error { background: #fef2f2; color: #dc2626; }
+    .status-box.info { background: #eff6ff; color: #2563eb; }
+</style>
