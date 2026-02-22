@@ -145,12 +145,12 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-700">Identificador (ID)</label>
-                                    <input bind:value={product.id} placeholder="ex: x-egg-bacon" class="form-input" required />
+                                    <input bind:value={product.id} placeholder="ex: x-egg-bacon" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300" required />
                                     <span class="text-[10px] text-slate-400 uppercase font-bold">Usado para controle interno</span>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-700">Categoria</label>
-                                    <select bind:value={product.category} class="form-input">
+                                    <select bind:value={product.category} class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300">
                                         {#each categories as cat}
                                             <option value={cat.id}>{cat.label}</option>
                                         {/each}
@@ -160,31 +160,31 @@
 
                             <div class="space-y-2">
                                 <label class="text-sm font-bold text-slate-700">Nome Público</label>
-                                <input bind:value={product.name} placeholder="Nome que o cliente verá" class="form-input" required />
+                                <input bind:value={product.name} placeholder="Nome que o cliente verá" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300" required />
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-700">Preço de Venda (R$)</label>
-                                    <input type="number" step="0.5" bind:value={product.price} placeholder="0.00" class="form-input" required />
+                                    <input type="number" step="0.5" bind:value={product.price} placeholder="0.00" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300" required />
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-sm font-bold text-slate-700">URL da Foto</label>
-                                    <input bind:value={product.image} placeholder="https://..." class="form-input" />
+                                    <input bind:value={product.image} placeholder="https://..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300" />
                                 </div>
                             </div>
 
                             <div class="space-y-2">
                                 <label class="text-sm font-bold text-slate-700">Descrição/Ingredientes</label>
-                                <textarea bind:value={product.description} placeholder="Ex: Pão, carne 150g, queijo, bacon..." class="form-input h-24 resize-none"></textarea>
+                                <textarea bind:value={product.description} placeholder="Ex: Pão, carne 150g, queijo, bacon..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300 h-24 resize-none"></textarea>
                             </div>
 
                             <div class="flex flex-wrap gap-4 pt-2">
-                                <label class="toggle-card" class:active={product.popular}>
+                                <label class="px-4 py-2 rounded-full border-2 font-bold text-xs cursor-pointer transition-all select-none {product.popular ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-slate-100 text-slate-400'}">
                                     <input type="checkbox" bind:checked={product.popular} class="hidden" />
                                     <span>⭐ Destaque</span>
                                 </label>
-                                <label class="toggle-card" class:active={product.disponivel}>
+                                <label class="px-4 py-2 rounded-full border-2 font-bold text-xs cursor-pointer transition-all select-none {product.disponivel ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-slate-100 text-slate-400'}">
                                     <input type="checkbox" bind:checked={product.disponivel} class="hidden" />
                                     <span>✅ Disponível</span>
                                 </label>
@@ -254,18 +254,6 @@
 </div>
 
 <style>
-    .form-input {
-        @apply w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-orange-500 focus:outline-none transition-all placeholder:text-slate-300;
-    }
-
-    .toggle-card {
-        @apply px-4 py-2 rounded-full border-2 border-slate-100 text-slate-400 font-bold text-xs cursor-pointer transition-all select-none;
-    }
-
-    .toggle-card.active {
-        @apply border-orange-500 bg-orange-50 text-orange-600;
-    }
-
     :global(.animate-bounce-slow) {
         animation: bounce 3s infinite;
     }
