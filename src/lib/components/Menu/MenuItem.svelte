@@ -37,7 +37,7 @@
 </script>
 
 <div class="menu-item-container">
-    <div class="menu-item" class:popular={item.popular}>
+    <div class="menu-item" class:popular={item.popular} class:unavailable={item.isAvailable === false}>
         <div class="item-image">
             <div class="image-placeholder" aria-hidden="true">
                 <i class={getCategoryIcon(item.category)}></i>
@@ -46,6 +46,11 @@
                 <div class="popular-badge">
                     <i class="fas fa-fire" aria-hidden="true"></i>
                     Popular
+                </div>
+            {/if}
+            {#if item.isAvailable === false}
+                <div class="unavailable-badge">
+                    Esgotado
                 </div>
             {/if}
             <button 
@@ -62,9 +67,14 @@
             <p class="item-description">{item.description}</p>
             <div class="item-footer">
                 <span class="item-price">{formatPrice(item.price)}</span>
-                <button class="add-button" on:click={addToCart} aria-label="Adicionar {item.name} ao carrinho">
+                <button 
+                    class="add-button" 
+                    on:click={addToCart} 
+                    disabled={item.isAvailable === false}
+                    aria-label={item.isAvailable === false ? "{item.name} esgotado" : "Adicionar {item.name} ao carrinho"}
+                >
                     <i class="fas fa-plus" aria-hidden="true"></i>
-                    Adicionar
+                    {item.isAvailable === false ? 'Esgotado' : 'Adicionar'}
                 </button>
             </div>
         </div>
@@ -108,6 +118,24 @@
     .menu-item.popular {
         border: 2px solid var(--secondary-color);
         box-shadow: 0 6px 25px rgba(245, 158, 11, 0.2);
+    }
+
+    .menu-item.unavailable {
+        opacity: 0.7;
+        filter: grayscale(0.5);
+    }
+
+    .unavailable-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: var(--gray-600);
+        color: var(--white);
+        padding: var(--spacing-1) var(--spacing-3);
+        border-radius: 20px;
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .item-image {
@@ -231,10 +259,17 @@
         font-size: var(--font-size-sm);
     }
 
-    .add-button:hover {
+    .add-button:hover:not(:disabled) {
         background: #d97706;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .add-button:disabled {
+        background: var(--gray-400);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
     }
 
     .reviews-dropdown {
