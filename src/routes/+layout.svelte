@@ -6,9 +6,11 @@
     import LoggerService from '$lib/services/LoggerService';
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+    import { cart } from '$lib/stores/cart';
     import '../app.css';
 
     onMount(() => {
+        cart.init();
         window.onerror = (message, source, lineno, colno, error) => {
             LoggerService.error('Global Client Error', {
                 message,

@@ -1,10 +1,16 @@
+interface UserData {
+    name: string;
+    phone: string;
+    [key: string]: any;
+}
+
 const USER_STORAGE_KEY = 'lanchedasi_user';
 
 export class UserRepository {
     /**
-     * @returns {Object|null}
+     * @returns {UserData|null}
      */
-    static getUser() {
+    static getUser(): UserData | null {
         if (typeof window === 'undefined') return null;
         try {
             const saved = localStorage.getItem(USER_STORAGE_KEY);
@@ -16,13 +22,13 @@ export class UserRepository {
     }
 
     /**
-     * @param {Object} userData { name: string, phone: string }
+     * @param {Partial<UserData>} userData 
      */
-    static saveUser(userData) {
+    static saveUser(userData: Partial<UserData>): void {
         if (typeof window === 'undefined') return;
         try {
             // Merge with existing data to preserve other fields if any
-            const existing = this.getUser() || {};
+            const existing = this.getUser() || {} as UserData;
             const updated = { ...existing, ...userData };
             localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updated));
         } catch (e) {
@@ -30,7 +36,7 @@ export class UserRepository {
         }
     }
 
-    static clearUser() {
+    static clearUser(): void {
         if (typeof window === 'undefined') return;
         localStorage.removeItem(USER_STORAGE_KEY);
     }

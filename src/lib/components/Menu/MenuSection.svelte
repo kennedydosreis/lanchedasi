@@ -110,8 +110,8 @@
         {:else if menuData}
             {#if popularItems.length > 0}
                 <div class="popular-section">
+                    <h2 class="section-title">⭐ Mais Pedidos</h2>
                     <MenuCategory
-                        title="⭐ Mais Pedidos"
                         items={popularItems}
                         categoryId="populares"
                     />
@@ -197,6 +197,14 @@
         max-width: 600px;
         margin: 0 auto;
         line-height: 1.6;
+    }
+
+    .section-title {
+        font-size: var(--font-size-3xl);
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-8);
+        text-align: center;
     }
 
     .popular-section {

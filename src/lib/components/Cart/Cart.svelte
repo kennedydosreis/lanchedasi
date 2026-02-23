@@ -4,6 +4,7 @@
     import CartItem from './CartItem.svelte';
     import CheckoutModal from '../Checkout/CheckoutModal.svelte';
     import { onMount, tick } from 'svelte';
+    import { browser } from '$app/environment';
 
     let isOpen = false;
     let showCheckoutModal = false;
@@ -296,188 +297,190 @@
                     </div>
                     <!-- /accessibility-fix -->
 
-                    <div class="order-details">
-                        <div class="form-group">
-                            <label for="observations">Observações (opcional):</label>
-                            <textarea
-                                id="observations"
-                                bind:value={observations}
-                                placeholder="Ex: Sem cebola, bem passado, etc..."
-                                rows="3"
-                            ></textarea>
-                        </div>
+                    {#if browser}
+                        <div class="order-details">
+                            <div class="form-group">
+                                <label for="observations">Observações (opcional):</label>
+                                <textarea
+                                    id="observations"
+                                    bind:value={observations}
+                                    placeholder="Ex: Sem cebola, bem passado, etc..."
+                                    rows="3"
+                                ></textarea>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="delivery-address">Endereço para entrega:</label>
-                            <div class="location-section" id="delivery-address">
-                                {#if showManualAddress}
-                                    <div class="manual-address-form">
-                                        <label for="manual-address">
-                                            {#if $orderInfo.address}
-                                                Corrigir endereço:
-                                            {:else}
-                                                Digite seu endereço completo:
-                                            {/if}
-                                        </label>
-                                        <textarea
-                                            id="manual-address"
-                                            bind:value={manualAddress}
-                                            placeholder="Ex: Rua Itororo, 22, Alvorada, Manaus - AM"
-                                            rows="3"
-                                        ></textarea>
-
-                                        {#if $orderInfo.location}
-                                            <label class="checkbox-label">
-                                                <input
-                                                    type="checkbox"
-                                                    bind:checked={recalculateDistance}
-                                                />
-                                                <span>Recalcular distância e frete para este endereço</span>
-                                            </label>
-                                        {/if}
-                                        <div class="manual-address-buttons">
-                                            <button
-                                                class="save-address-btn"
-                                                on:click={saveManualAddress}
-                                                disabled={!manualAddress.trim()}
-                                            >
-                                                <i class="fas fa-check" aria-hidden="true"></i>
+                            <div class="form-group">
+                                <label for="delivery-address">Endereço para entrega:</label>
+                                <div class="location-section" id="delivery-address">
+                                    {#if showManualAddress}
+                                        <div class="manual-address-form">
+                                            <label for="manual-address">
                                                 {#if $orderInfo.address}
-                                                    Atualizar Endereço
+                                                    Corrigir endereço:
                                                 {:else}
-                                                    Salvar Endereço
+                                                    Digite seu endereço completo:
+                                                {/if}
+                                            </label>
+                                            <textarea
+                                                id="manual-address"
+                                                bind:value={manualAddress}
+                                                placeholder="Ex: Rua Itororo, 22, Alvorada, Manaus - AM"
+                                                rows="3"
+                                            ></textarea>
+
+                                            {#if $orderInfo.location}
+                                                <label class="checkbox-label">
+                                                    <input
+                                                        type="checkbox"
+                                                        bind:checked={recalculateDistance}
+                                                    />
+                                                    <span>Recalcular distância e frete para este endereço</span>
+                                                </label>
+                                            {/if}
+                                            <div class="manual-address-buttons">
+                                                <button
+                                                    class="save-address-btn"
+                                                    on:click={saveManualAddress}
+                                                    disabled={!manualAddress.trim()}
+                                                >
+                                                    <i class="fas fa-check" aria-hidden="true"></i>
+                                                    {#if $orderInfo.address}
+                                                        Atualizar Endereço
+                                                    {:else}
+                                                        Salvar Endereço
+                                                    {/if}
+                                                </button>
+                                                <button class="cancel-address-btn" on:click={toggleManualAddress}>
+                                                    <i class="fas fa-times" aria-hidden="true"></i>
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {:else if $orderInfo.address}
+                                        <div class="location-display">
+                                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                            <div class="location-info">
+                                                <span class="address">{$orderInfo.address}</span>
+                                                {#if $orderInfo.distance !== null}
+                                                    <div class="delivery-info">
+                                                        <span class="distance">📏 {$orderInfo.distance}km do restaurante</span>
+                                                        {#if $orderInfo.location && $orderInfo.location.accuracy}
+                                                            {@const accuracy = Math.round($orderInfo.location.accuracy)}
+                                                            <span class="accuracy" class:low-accuracy={accuracy > 200} class:medium-accuracy={accuracy > 100 && accuracy <= 200}>
+                                                                🎯 Precisão: ±{accuracy}m
+                                                                {#if accuracy > 200}
+                                                                    ⚠️ Muito imprecisa
+                                                                {:else if accuracy > 100}
+                                                                    ⚠️ Pouco precisa
+                                                                {:else}
+                                                                    ✅ Boa precisão
+                                                                {/if}
+                                                            </span>
+                                                        {/if}
+                                                        {#if !$orderInfo.canDeliver}
+                                                            <span class="error">❌ Fora da área de entrega (máx. 15km)</span>
+                                                        {:else if $orderInfo.deliveryFee === 0}
+                                                            <span class="free">🎉 Entrega grátis!</span>
+                                                        {:else}
+                                                            <span class="fee">🚚 Taxa de entrega: {formatPrice($orderInfo.deliveryFee)}</span>
+                                                        {/if}
+                                                    </div>
+                                                {/if}
+                                            </div>
+                                            <div class="location-actions">
+                                                <button class="location-clear" on:click={() => orderInfo.clear()} aria-label="Limpar localização">
+                                                    <i class="fas fa-times" aria-hidden="true"></i>
+                                                </button>
+                                                {#if $orderInfo.location && $orderInfo.location.accuracy && $orderInfo.location.accuracy > 100}
+                                                    <button class="fix-address-btn" on:click={toggleManualAddress} aria-label="Corrigir endereço">
+                                                        <i class="fas fa-edit" aria-hidden="true"></i>
+                                                        <span>Corrigir</span>
+                                                    </button>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                    {:else}
+                                        <div class="location-buttons">
+                                            <button
+                                                class="location-btn"
+                                                on:click={getLocation}
+                                                disabled={$orderInfo.isLoadingLocation}
+                                            >
+                                                {#if $orderInfo.isLoadingLocation}
+                                                    <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                                                    Calculando entrega...
+                                                {:else}
+                                                    <i class="fas fa-location-arrow" aria-hidden="true"></i>
+                                                    Usar minha localização
                                                 {/if}
                                             </button>
-                                            <button class="cancel-address-btn" on:click={toggleManualAddress}>
-                                                <i class="fas fa-times" aria-hidden="true"></i>
-                                                Cancelar
+
+                                            <button class="manual-btn" on:click={toggleManualAddress}>
+                                                <i class="fas fa-edit" aria-hidden="true"></i>
+                                                Digitar endereço
                                             </button>
                                         </div>
-                                    </div>
-                                {:else if $orderInfo.address}
-                                    <div class="location-display">
-                                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                                        <div class="location-info">
-                                            <span class="address">{$orderInfo.address}</span>
-                                            {#if $orderInfo.distance !== null}
-                                                <div class="delivery-info">
-                                                    <span class="distance">📏 {$orderInfo.distance}km do restaurante</span>
-                                                    {#if $orderInfo.location && $orderInfo.location.accuracy}
-                                                        {@const accuracy = Math.round($orderInfo.location.accuracy)}
-                                                        <span class="accuracy" class:low-accuracy={accuracy > 200} class:medium-accuracy={accuracy > 100 && accuracy <= 200}>
-                                                            🎯 Precisão: ±{accuracy}m
-                                                            {#if accuracy > 200}
-                                                                ⚠️ Muito imprecisa
-                                                            {:else if accuracy > 100}
-                                                                ⚠️ Pouco precisa
-                                                            {:else}
-                                                                ✅ Boa precisão
-                                                            {/if}
-                                                        </span>
-                                                    {/if}
-                                                    {#if !$orderInfo.canDeliver}
-                                                        <span class="error">❌ Fora da área de entrega (máx. 15km)</span>
-                                                    {:else if $orderInfo.deliveryFee === 0}
-                                                        <span class="free">🎉 Entrega grátis!</span>
-                                                    {:else}
-                                                        <span class="fee">🚚 Taxa de entrega: {formatPrice($orderInfo.deliveryFee)}</span>
-                                                    {/if}
-                                                </div>
-                                            {/if}
-                                        </div>
-                                        <div class="location-actions">
-                                            <button class="location-clear" on:click={() => orderInfo.clear()} aria-label="Limpar localização">
-                                                <i class="fas fa-times" aria-hidden="true"></i>
-                                            </button>
-                                            {#if $orderInfo.location && $orderInfo.location.accuracy && $orderInfo.location.accuracy > 100}
-                                                <button class="fix-address-btn" on:click={toggleManualAddress} aria-label="Corrigir endereço">
-                                                    <i class="fas fa-edit" aria-hidden="true"></i>
-                                                    <span>Corrigir</span>
-                                                </button>
-                                            {/if}
-                                        </div>
-                                    </div>
-                                {:else}
-                                    <div class="location-buttons">
-                                        <button
-                                            class="location-btn"
-                                            on:click={getLocation}
-                                            disabled={$orderInfo.isLoadingLocation}
-                                        >
-                                            {#if $orderInfo.isLoadingLocation}
-                                                <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
-                                                Calculando entrega...
-                                            {:else}
-                                                <i class="fas fa-location-arrow" aria-hidden="true"></i>
-                                                Usar minha localização
-                                            {/if}
-                                        </button>
+                                        <p class="delivery-note">
+                                            📍 Entrega grátis até 3km<br>
+                                            🚚 R$ 2,50 por km adicional<br>
+                                            📏 Máximo 15km de distância
+                                        </p>
+                                    {/if}
 
-                                        <button class="manual-btn" on:click={toggleManualAddress}>
-                                            <i class="fas fa-edit" aria-hidden="true"></i>
-                                            Digitar endereço
-                                        </button>
-                                    </div>
-                                    <p class="delivery-note">
-                                        📍 Entrega grátis até 3km<br>
-                                        🚚 R$ 2,50 por km adicional<br>
-                                        📏 Máximo 15km de distância
-                                    </p>
-                                {/if}
-
-                                {#if showLocationError}
-                                    <div class="error-message" role="alert">
-                                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-                                        {locationErrorMessage}
-                                    </div>
-                                {/if}
+                                    {#if showLocationError}
+                                        <div class="error-message" role="alert">
+                                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                            {locationErrorMessage}
+                                        </div>
+                                    {/if}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="cart-footer">
-                        <div class="order-summary">
-                            <div class="summary-line">
-                                <span>Subtotal:</span>
-                                <span>{formatPrice(total)}</span>
-                            </div>
-                            {#if $orderInfo.deliveryFee > 0}
+                        <div class="cart-footer">
+                            <div class="order-summary">
                                 <div class="summary-line">
-                                    <span>Entrega ({$orderInfo.distance}km):</span>
-                                    <span>{formatPrice($orderInfo.deliveryFee)}</span>
+                                    <span>Subtotal:</span>
+                                    <span>{formatPrice(total)}</span>
                                 </div>
-                            {:else if $orderInfo.deliveryFee === 0 && $orderInfo.distance !== null}
-                                <div class="summary-line free-delivery">
-                                    <span>Entrega ({$orderInfo.distance}km):</span>
-                                    <span>Grátis! 🎉</span>
+                                {#if $orderInfo.deliveryFee > 0}
+                                    <div class="summary-line">
+                                        <span>Entrega ({$orderInfo.distance}km):</span>
+                                        <span>{formatPrice($orderInfo.deliveryFee)}</span>
+                                    </div>
+                                {:else if $orderInfo.deliveryFee === 0 && $orderInfo.distance !== null}
+                                    <div class="summary-line free-delivery">
+                                        <span>Entrega ({$orderInfo.distance}km):</span>
+                                        <span>Grátis! 🎉</span>
+                                    </div>
+                                {/if}
+                                <div class="summary-line total">
+                                    <strong>Total: {formatPrice(finalTotal)}</strong>
                                 </div>
-                            {/if}
-                            <div class="summary-line total">
-                                <strong>Total: {formatPrice(finalTotal)}</strong>
+                            </div>
+                            <div class="footer-buttons">
+                                <button
+                                    class="order-btn checkout-btn"
+                                    on:click={openCheckoutModal}
+                                >
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                    Finalizar Pedido
+                                </button>
+                                <button
+                                    class="order-btn legacy-btn"
+                                    on:click={sendOrder}
+                                    disabled={!$orderInfo.canDeliver && $orderInfo.location}
+                                >
+                                    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                    {#if !$orderInfo.canDeliver && $orderInfo.location}
+                                        Fora da área de entrega
+                                    {:else}
+                                        Pedido Rápido (com localização)
+                                    {/if}
+                                </button>
                             </div>
                         </div>
-                        <div class="footer-buttons">
-                            <button
-                                class="order-btn checkout-btn"
-                                on:click={openCheckoutModal}
-                            >
-                                <i class="fas fa-check-circle" aria-hidden="true"></i>
-                                Finalizar Pedido
-                            </button>
-                            <button
-                                class="order-btn legacy-btn"
-                                on:click={sendOrder}
-                                disabled={!$orderInfo.canDeliver && $orderInfo.location}
-                            >
-                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                                {#if !$orderInfo.canDeliver && $orderInfo.location}
-                                    Fora da área de entrega
-                                {:else}
-                                    Pedido Rápido (com localização)
-                                {/if}
-                            </button>
-                        </div>
-                    </div>
+                    {/if}
                 {/if}
             </div>
         </div>
