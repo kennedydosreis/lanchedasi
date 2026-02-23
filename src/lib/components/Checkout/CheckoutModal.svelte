@@ -2,14 +2,12 @@
     import { onMount } from 'svelte';
     import { CheckoutService } from '$lib/services/CheckoutService.js';
     import { cart } from '$lib/stores/cart';
-    import { validateCartForCheckout, truncateWhatsAppMessage } from '$lib/utils/CartValidator.ts';
+    import { validateCartForCheckout } from '$lib/utils/CartValidator.ts';
     import { loadMenuData } from '$lib/utils/loadMenu.js';
 
     export let cartItems = [];
     export let onClose = () => {};
     export let onConfirm = () => {};
-
-    const WHATSAPP_NUMBER = '5592993525884';
 
     let menuData = null;
     let formData = {
@@ -59,7 +57,6 @@
 
         try {
             // 1. Validação estrutural e lógica de negócio via Service (Zod)
-            // Note: CheckoutService.processOrder já lida com a validação do Schema e LocalStorage
             const whatsappUrl = await CheckoutService.processOrder(formData);
             
             // 2. Validação de integridade do carrinho (legado mantido para segurança)
@@ -91,7 +88,7 @@
         }
     }
 
-    $: subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    $: subtotal = cartItems.reduce((sum, item) => sum + ((item.price || item.preco) * item.quantity), 0);
 </script>
 
 <div class="modal-overlay" on:click={onClose} on:keydown={handleKeydown} role="presentation">
@@ -106,11 +103,12 @@
 
         <div class="modal-body">
             <!-- Order Summary -->
-            <div class="order-summary">
-                <h3>Resumo do Pedido</h3>
-                <div class="summary-items">
+            <!-- accessibility-fix: issue-26 - Focus management and trap needed -->
+            <div class="order-summary" aria-labelledby="summary-title">
+                <h3 id="summary-title">Resumo do Pedido</h3>
+                <div class="summary-items" role="list">
                     {#each cartItems as item}
-                        <div class="summary-item">
+                        <div class="summary-item" role="listitem">
                             <span>{item.quantity}x {item.nome || item.name}</span>
                             <span>{formatPrice((item.preco || item.price) * item.quantity)}</span>
                         </div>
@@ -123,40 +121,43 @@
             </div>
 
             <!-- Checkout Form -->
-            <form on:submit|preventDefault={handleSubmit}>
+            <form on:submit|preventDefault={handleSubmit} aria-labelledby="form-title">
                 <div class="form-section">
-                    <h3>Dados de Entrega</h3>
+                    <h3 id="form-title">Dados de Entrega</h3>
                     
                     <div class="form-group">
-                        <label for="name">Nome Completo <span class="required">*</span></label>
+                        <label for="name">Nome Completo <span class="required" aria-hidden="true">*</span></label>
                         <input
                             id="name"
                             type="text"
                             bind:value={formData.name}
                             placeholder="Como quer ser chamado?"
                             required
+                            aria-required="true"
                         />
                     </div>
 
                     <div class="form-group">
-                        <label for="phone">WhatsApp <span class="required">*</span></label>
+                        <label for="phone">WhatsApp <span class="required" aria-hidden="true">*</span></label>
                         <input
                             id="phone"
-                            type="text"
+                            type="tel"
                             bind:value={formData.phone}
                             placeholder="(92) 99999-9999"
                             required
+                            aria-required="true"
                         />
                     </div>
 
                     <div class="form-group">
-                        <label for="address">Endereço Completo <span class="required">*</span></label>
+                        <label for="address">Endereço Completo <span class="required" aria-hidden="true">*</span></label>
                         <textarea
                             id="address"
                             bind:value={formData.address}
                             placeholder="Rua, número, bairro e ponto de referência"
                             rows="2"
                             required
+                            aria-required="true"
                         ></textarea>
                     </div>
                 </div>
@@ -164,35 +165,36 @@
                 <div class="form-section">
                     <h3>Pagamento</h3>
                     
-                    <div class="payment-options">
+                    <div class="payment-options" role="radiogroup" aria-label="Método de Pagamento">
                         <label class="radio-label">
                             <input type="radio" value="pix" bind:group={formData.paymentMethod} />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text"><i class="fas fa-qrcode"></i> PIX</span>
+                            <span class="radio-custom" aria-hidden="true"></span>
+                            <span class="radio-text"><i class="fas fa-qrcode" aria-hidden="true"></i> PIX</span>
                         </label>
 
                         <label class="radio-label">
                             <input type="radio" value="dinheiro" bind:group={formData.paymentMethod} />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text"><i class="fas fa-money-bill-wave"></i> Dinheiro</span>
+                            <span class="radio-custom" aria-hidden="true"></span>
+                            <span class="radio-text"><i class="fas fa-money-bill-wave" aria-hidden="true"></i> Dinheiro</span>
                         </label>
 
                         {#if formData.paymentMethod === 'dinheiro'}
                             <div class="form-group mt-2">
-                                <input type="text" bind:value={formData.change} placeholder="Troco para quanto?" />
+                                <label for="change" class="sr-only">Troco para quanto?</label>
+                                <input id="change" type="text" bind:value={formData.change} placeholder="Troco para quanto?" />
                             </div>
                         {/if}
 
                         <label class="radio-label">
                             <input type="radio" value="cartao" bind:group={formData.paymentMethod} />
-                            <span class="radio-custom"></span>
-                            <span class="radio-text"><i class="fas fa-credit-card"></i> Cartão (Maquininha)</span>
+                            <span class="radio-custom" aria-hidden="true"></span>
+                            <span class="radio-text"><i class="fas fa-credit-card" aria-hidden="true"></i> Cartão (Maquininha)</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <h3>Observações <span class="optional">(opcional)</span></h3>
+                    <label for="observations">Observações <span class="optional">(opcional)</span></label>
                     <textarea
                         id="observations"
                         bind:value={formData.observations}
@@ -203,7 +205,7 @@
 
                 {#if validationError}
                     <div class="validation-error" role="alert">
-                        <i class="fas fa-exclamation-triangle"></i>
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                         {validationError}
                     </div>
                 {/if}
@@ -212,9 +214,9 @@
                     <button type="button" class="btn-cancel" on:click={onClose}>Voltar</button>
                     <button type="submit" class="btn-submit" disabled={isSubmitting}>
                         {#if isSubmitting}
-                            <i class="fas fa-spinner fa-spin"></i> Processando...
+                            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Processando...
                         {:else}
-                            <i class="fab fa-whatsapp"></i> Enviar Pedido
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i> Enviar Pedido
                         {/if}
                     </button>
                 </div>
@@ -278,7 +280,7 @@
 
     label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; }
 
-    input[type="text"], textarea {
+    input[type="text"], input[type="tel"], textarea {
         width: 100%;
         padding: 0.8rem;
         border: 1px solid #ddd;
@@ -348,4 +350,16 @@
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .mt-2 { margin-top: 0.5rem; }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
 </style>

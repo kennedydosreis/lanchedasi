@@ -1,38 +1,18 @@
-import { z } from 'zod';
+export interface MenuItem {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: 'sanduiches' | 'kikao' | 'bebidas' | 'porcoes' | 'combos' | 'pratos';
+    image?: string;
+    popular?: boolean;
+    disponivel?: boolean;
+}
 
-/**
- * Schema para um item individual do cardápio
- */
-export const MenuItemSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  price: z.number().positive(),
-  category: z.string(),
-  image: z.string(),
-  popular: z.boolean().optional(),
-});
+export interface MenuData {
+    [key: string]: MenuItem[];
+}
 
-/**
- * Schema para o cardápio completo
- */
-export const MenuDataSchema = z.object({
-  version: z.string(),
-  combos: z.array(MenuItemSchema),
-  sanduiches: z.array(MenuItemSchema),
-  kikao: z.array(MenuItemSchema),
-  bebidas: z.array(MenuItemSchema),
-  porcoes: z.array(MenuItemSchema),
-  pratos: z.array(MenuItemSchema),
-  sobremesas: z.array(MenuItemSchema),
-});
-
-/**
- * Tipo inferido do schema de item do cardápio
- */
-export type MenuItem = z.infer<typeof MenuItemSchema>;
-
-/**
- * Tipo inferido do schema do cardápio completo
- */
-export type MenuData = z.infer<typeof MenuDataSchema>;
+export interface CartItem extends MenuItem {
+    quantity: number;
+}
