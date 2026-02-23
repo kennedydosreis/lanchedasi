@@ -10,6 +10,6 @@ export const ReviewSchema = z.object({
     isVerified: z.boolean().default(false)
 });
 
-export type Review = z.infer<typeof ReviewSchema>;
+/** @typedef {import('zod').infer<typeof ReviewSchema>} Review */
 
 export const ReviewStoreSchema = z.array(ReviewSchema);
