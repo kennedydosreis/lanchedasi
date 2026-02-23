@@ -1,12 +1,22 @@
 <script>
     import { cart } from '$lib/stores/cart.js';
     import ReviewSection from '$lib/components/reviews/ReviewSection.svelte';
+    import { ReviewRepository } from '$lib/repositories/ReviewRepository';
     import { fade } from 'svelte/transition';
     import { onMount } from 'svelte';
 
     export let item;
 
     let showReviews = false;
+    let reviews = [];
+
+    onMount(async () => {
+        reviews = await ReviewRepository.getReviewsByItem(item.id);
+    });
+
+    $: averageRating = reviews.length > 0 
+        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+        : null;
 
     function addToCart() {
         cart.addItem(item);
@@ -63,7 +73,15 @@
             </button>
         </div>
         <div class="item-content">
-            <h3 class="item-name">{item.name}</h3>
+            <div class="item-header">
+                <h3 class="item-name">{item.name}</h3>
+                {#if averageRating}
+                    <div class="item-rating">
+                        <i class="fas fa-star"></i>
+                        <span>{averageRating}</span>
+                    </div>
+                {/if}
+            </div>
             <p class="item-description">{item.description}</p>
             <div class="item-footer">
                 <span class="item-price">{formatPrice(item.price)}</span>
@@ -211,12 +229,37 @@
         gap: var(--spacing-3);
     }
 
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
     .item-name {
         font-size: var(--font-size-xl);
         font-weight: 600;
         color: var(--gray-900);
         margin: 0;
         line-height: 1.2;
+        flex: 1;
+    }
+
+    .item-rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #fff8e6;
+        color: #b45309;
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .item-rating i {
+        font-size: 10px;
+        color: #f59e0b;
     }
 
     .item-description {
