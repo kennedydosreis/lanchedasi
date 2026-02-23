@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { sanitizeQuantity } from '$lib/utils/CartValidator.ts';
 import { CartRepository } from '$lib/repositories/CartRepository';
+import { PriceService } from '$lib/services/PriceService';
 
 function createCart() {
     const { subscribe, set, update } = writable([]);
@@ -60,19 +61,8 @@ function createCart() {
             CartRepository.clearCart();
             set([]);
         },
-        getTotal: (cartItems) => {
-            return cartItems.reduce((total, item) => {
-                const price = Number(item.price) || 0;
-                const quantity = sanitizeQuantity(item.quantity);
-                return total + (price * quantity);
-            }, 0);
-        },
-        getItemCount: (cartItems) => {
-            return cartItems.reduce((count, item) => {
-                const quantity = sanitizeQuantity(item.quantity);
-                return count + quantity;
-            }, 0);
-        }
+        getTotal: (cartItems) => PriceService.calculateTotal(cartItems),
+        getItemCount: (cartItems) => PriceService.calculateItemCount(cartItems)
     };
 }
 
