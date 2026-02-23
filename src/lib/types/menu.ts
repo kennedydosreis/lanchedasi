@@ -6,7 +6,7 @@ export interface MenuItem {
     category: 'sanduiches' | 'kikao' | 'bebidas' | 'porcoes' | 'combos' | 'pratos';
     image?: string;
     popular?: boolean;
-    disponivel?: boolean;
+    isAvailable: boolean;
 }
 
 export interface MenuData {

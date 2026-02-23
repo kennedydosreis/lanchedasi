@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 import { cart } from '../stores/cart';
 import { z } from 'zod';
 import LoggerService from './LoggerService';
+import { UserRepository } from '../repositories/UserRepository.js';
 
 /**
  * Esquema de validação para os dados do pedido
@@ -141,6 +142,10 @@ export class CheckoutService {
 
         // 3. Salvar info do cliente para próxima compra
         this.saveCustomerInfo(customerData);
+        UserRepository.saveUser({
+            name: customerData.name,
+            phone: customerData.phone
+        });
 
         // 4. Gerar link do WhatsApp
         const phoneNumber = "5592991144080"; // Número real do Lanche da Si
