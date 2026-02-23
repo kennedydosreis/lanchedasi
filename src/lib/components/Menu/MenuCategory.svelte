@@ -1,15 +1,17 @@
 <script>
     import MenuItem from './MenuItem.svelte';
 
-    export let title;
+    export let title = '';
     export let items;
     export let categoryId;
     export let description = '';
 </script>
 
-<section class="menu-category" id={categoryId} aria-label={title}>
+<section class="menu-category" id={categoryId} aria-labelledby="{categoryId}-title">
     <div class="category-header">
-        <h3 class="category-title">{title}</h3>
+        {#if title}
+            <h3 class="category-title" id="{categoryId}-title">{title}</h3>
+        {/if}
         {#if description}
             <p class="category-description">{description}</p>
         {/if}

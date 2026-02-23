@@ -1,10 +1,10 @@
 export class GitHubService {
     /**
      * Atualiza o cardápio no GitHub via API (Custo Zero)
-     * @param {Object} newProduct 
+     * @param {any} newProduct 
      * @param {string} token 
      */
-    static async updateMenu(newProduct, token) {
+    static async updateMenu(newProduct: any, token: string): Promise<boolean> {
         const repo = 'kennedydosreis/lanchedasi';
         const path = 'static/data/menu.json';
 
@@ -27,8 +27,14 @@ export class GitHubService {
 
             const fileData = await response.json();
             
-            // Decodificação segura para UTF-8 (suporta acentos como 'ç')
-            const contentDecoded = decodeURIComponent(escape(atob(fileData.content)));
+            // Decodificação segura para UTF-8 usando TextDecoder (evita corrupção de acentos)
+            const binaryString = atob(fileData.content);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const decoder = new TextDecoder('utf-8');
+            const contentDecoded = decoder.decode(bytes);
             const currentContent = JSON.parse(contentDecoded);
 
             // 2. Adicionar o novo produto na categoria correta
@@ -37,14 +43,20 @@ export class GitHubService {
             }
             
             // Evitar duplicidade de ID no mesmo push
-            const exists = currentContent[newProduct.category].some(p => p.id === newProduct.id);
+            const exists = currentContent[newProduct.category].some((p: any) => p.id === newProduct.id);
             if (!exists) {
                 currentContent[newProduct.category].push(newProduct);
             }
 
-            // 3. Enviar de volta para o GitHub com codificação segura
+            // 3. Enviar de volta para o GitHub com codificação segura usando TextEncoder
             const jsonString = JSON.stringify(currentContent, null, 2);
-            const updatedContent = btoa(unescape(encodeURIComponent(jsonString)));
+            const encoder = new TextEncoder();
+            const encodedBytes = encoder.encode(jsonString);
+            let updatedBinaryString = '';
+            for (let i = 0; i < encodedBytes.byteLength; i++) {
+                updatedBinaryString += String.fromCharCode(encodedBytes[i]);
+            }
+            const updatedContent = btoa(updatedBinaryString);
 
             console.log('GitHubService: Enviando atualização...');
             const putResponse = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {

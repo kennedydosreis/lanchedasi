@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { ReviewRepository } from '$lib/repositories/ReviewRepository';
     import LoggerService from '$lib/services/LoggerService';
+    import { browser } from '$app/environment';
 
     export let itemId;
     export let itemName;
@@ -13,10 +14,13 @@
     let errorMessage = '';
 
     onMount(async () => {
-        await loadReviews();
+        if (browser) {
+            await loadReviews();
+        }
     });
 
     async function loadReviews() {
+        if (!browser) return;
         loading = true;
         try {
             reviews = await ReviewRepository.getReviewsByItem(itemId);

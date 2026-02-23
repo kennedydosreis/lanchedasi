@@ -2,9 +2,9 @@ const CART_STORAGE_KEY = 'lanchedasi_cart';
 
 export class CartRepository {
     /**
-     * @returns {Array}
+     * @returns {any[]}
      */
-    static getCart() {
+    static getCart(): any[] {
         if (typeof window === 'undefined') return [];
         try {
             const saved = localStorage.getItem(CART_STORAGE_KEY);
@@ -16,9 +16,9 @@ export class CartRepository {
     }
 
     /**
-     * @param {Array} items 
+     * @param {any[]} items 
      */
-    static saveCart(items) {
+    static saveCart(items: any[]): void {
         if (typeof window === 'undefined') return;
         try {
             localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
@@ -27,7 +27,7 @@ export class CartRepository {
         }
     }
 
-    static clearCart() {
+    static clearCart(): void {
         if (typeof window === 'undefined') return;
         localStorage.removeItem(CART_STORAGE_KEY);
     }

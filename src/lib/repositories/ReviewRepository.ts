@@ -1,10 +1,13 @@
 import { ReviewSchema, ReviewStoreSchema } from '../schemas/review.schema';
 import { browser } from '$app/environment';
+import type { z } from 'zod';
+
+type Review = z.infer<typeof ReviewSchema>;
 
 export class ReviewRepository {
     static STORAGE_KEY = 'lanchedasi_reviews';
 
-    static async getReviewsByItem(itemId) {
+    static async getReviewsByItem(itemId: string): Promise<Review[]> {
         if (!browser) return [];
         
         const raw = localStorage.getItem(this.STORAGE_KEY);
@@ -13,14 +16,14 @@ export class ReviewRepository {
         try {
             const allReviews = JSON.parse(raw);
             const validated = ReviewStoreSchema.parse(allReviews);
-            return validated.filter(r => r.itemId === itemId);
+            return validated.filter((r: Review) => r.itemId === itemId);
         } catch (e) {
             console.error('Failed to parse reviews:', e);
             return [];
         }
     }
 
-    static async addReview(reviewData) {
+    static async addReview(reviewData: any): Promise<Review | null> {
         if (!browser) return null;
 
         try {

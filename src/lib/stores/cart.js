@@ -1,13 +1,16 @@
 import { writable } from 'svelte/store';
 import { sanitizeQuantity } from '$lib/utils/CartValidator.ts';
-import { CartRepository } from '$lib/repositories/CartRepository.js';
+import { CartRepository } from '$lib/repositories/CartRepository';
 
 function createCart() {
-    const initialCart = CartRepository.getCart();
-    const { subscribe, set, update } = writable(initialCart);
+    const { subscribe, set, update } = writable([]);
 
     return {
         subscribe,
+        init: () => {
+            const initialCart = CartRepository.getCart();
+            set(initialCart);
+        },
         addItem: (item) => update(cart => {
             // Validate item availability and required fields
             if (!item || !item.id || !item.name || item.price === undefined || item.isAvailable === false) {
@@ -15,13 +18,13 @@ function createCart() {
                 return cart;
             }
 
-            const existingItem = cart.find(cartItem => cartItem.id === item.id);
+            const existingItemIndex = cart.findIndex(cartItem => cartItem.id === item.id);
             let newCart;
-            if (existingItem) {
-                // Sanitize new quantity
-                const newQuantity = sanitizeQuantity(existingItem.quantity + 1);
-                existingItem.quantity = newQuantity;
+            if (existingItemIndex !== -1) {
                 newCart = [...cart];
+                // Sanitize new quantity
+                const newQuantity = sanitizeQuantity(newCart[existingItemIndex].quantity + 1);
+                newCart[existingItemIndex] = { ...newCart[existingItemIndex], quantity: newQuantity };
             } else {
                 newCart = [...cart, { ...item, quantity: 1 }];
             }

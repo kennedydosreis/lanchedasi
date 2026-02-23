@@ -8,6 +8,17 @@
 </script>
 
 <section id="inicio" class="hero" aria-label="Página inicial">
+    <div class="hero-image-container">
+        <img 
+            src="/assets/hero-bg.jpg" 
+            alt="Hambúrguer artesanal suculento" 
+            class="hero-image"
+            fetchpriority="high"
+            loading="eager"
+            srcset="/assets/hero-bg-400w.jpg 400w, /assets/hero-bg-800w.jpg 800w, /assets/hero-bg.jpg 1200w"
+            sizes="(max-width: 768px) 100vw, 1200px"
+        />
+    </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <!-- accessibility-fix: issue-10 - Decorative icons aria-hidden -->
@@ -69,8 +80,21 @@
         align-items: center;
         justify-content: center;
         padding-top: 80px;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        background: #1a1a2e;
         overflow: hidden;
+    }
+
+    .hero-image-container {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+
+    .hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.4;
     }
 
     .hero::before {

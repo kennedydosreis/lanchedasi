@@ -2,7 +2,7 @@ import { get } from 'svelte/store';
 import { cart } from '../stores/cart';
 import { z } from 'zod';
 import LoggerService from './LoggerService';
-import { UserRepository } from '../repositories/UserRepository.js';
+import { UserRepository } from '../repositories/UserRepository';
 
 /**
  * Esquema de validação para os dados do pedido
