@@ -6,29 +6,52 @@ export class GitHubService {
      */
     static async updateMenu(newProduct, token) {
         const repo = 'kennedydosreis/lanchedasi';
-        const path = 'static/data/menu.json'; // Corrigido para o caminho correto onde o site lê os dados
+        const path = 'static/data/menu.json';
 
         try {
-            // 1. Buscar o arquivo atual e seu SHA (necessário para update)
-            const getUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+            console.log('GitHubService: Buscando arquivo atual...');
+            
+            // 1. Buscar o arquivo atual (adicionando timestamp para evitar cache)
+            const getUrl = `https://api.github.com/repos/${repo}/contents/${path}?t=${Date.now()}`;
             const response = await fetch(getUrl, {
-                headers: { 'Authorization': `token ${token}` }
+                headers: { 
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
             });
+
+            if (!response.ok) {
+                console.error('GitHubService: Erro ao buscar SHA', response.status);
+                return false;
+            }
+
             const fileData = await response.json();
-            const currentContent = JSON.parse(atob(fileData.content));
+            
+            // Decodificação segura para UTF-8 (suporta acentos como 'ç')
+            const contentDecoded = decodeURIComponent(escape(atob(fileData.content)));
+            const currentContent = JSON.parse(contentDecoded);
 
             // 2. Adicionar o novo produto na categoria correta
             if (!currentContent[newProduct.category]) {
                 currentContent[newProduct.category] = [];
             }
-            currentContent[newProduct.category].push(newProduct);
+            
+            // Evitar duplicidade de ID no mesmo push
+            const exists = currentContent[newProduct.category].some(p => p.id === newProduct.id);
+            if (!exists) {
+                currentContent[newProduct.category].push(newProduct);
+            }
 
-            // 3. Enviar de volta para o GitHub
-            const updatedContent = btoa(JSON.stringify(currentContent, null, 2));
-            const putResponse = await fetch(getUrl, {
+            // 3. Enviar de volta para o GitHub com codificação segura
+            const jsonString = JSON.stringify(currentContent, null, 2);
+            const updatedContent = btoa(unescape(encodeURIComponent(jsonString)));
+
+            console.log('GitHubService: Enviando atualização...');
+            const putResponse = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -38,9 +61,16 @@ export class GitHubService {
                 })
             });
 
-            return putResponse.ok;
+            if (putResponse.ok) {
+                console.log('GitHubService: Sucesso!');
+                return true;
+            } else {
+                const errorData = await putResponse.json();
+                console.error('GitHubService: Erro no PUT', errorData);
+                return false;
+            }
         } catch (err) {
-            console.error('Erro na integração com GitHub:', err);
+            console.error('GitHubService: Falha catastrófica:', err);
             return false;
         }
     }
