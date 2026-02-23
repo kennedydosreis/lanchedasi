@@ -95,8 +95,8 @@
         {#if errorMessage}
             <p class="text-red-500 text-[10px] mt-1 text-right">{errorMessage}</p>
         {/if}
-     neighborhood </div>
-{/if}
+    {/if}
+</div>
 
 <style>
     .rating-container {
