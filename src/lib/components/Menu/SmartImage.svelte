@@ -13,23 +13,23 @@
     $: processedSrc = src ? `${PROXY_BASE}/${src}` : null;
 </script>
 
-<div class="relative overflow-hidden bg-gray-100 {className}" style="aspect-ratio: 1/1;">
+<div class="relative overflow-hidden bg-gray-100 {className}" style="height: 100%; width: 100%;">
     {#if !loaded && !error}
-        <div class="absolute inset-0 animate-pulse bg-gray-200"></div>
+        <div class="absolute inset-0 animate-pulse bg-gray-200" style="position: absolute; inset: 0; background: #eee;"></div>
     {/if}
 
     {#if src && !error}
         <img
             src={processedSrc}
             {alt}
-            class="w-full h-full object-cover transition-opacity duration-500 {loaded ? 'opacity-100' : 'opacity-0'}"
+            style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s, transform 0.5s; opacity: {loaded ? '1' : '0'}"
             on:load={() => loaded = true}
             on:error={() => error = true}
             loading="lazy"
         />
     {:else}
-        <div class="flex items-center justify-center h-full text-gray-300">
-            <span class="text-4xl">🍔</span>
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f3f4f6; color: #d1d5db;">
+            <span style="font-size: 3rem;">🍔</span>
         </div>
     {/if}
 </div>

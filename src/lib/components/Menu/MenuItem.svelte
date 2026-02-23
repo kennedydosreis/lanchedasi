@@ -9,6 +9,7 @@
     import PriceTag from '../atoms/PriceTag.svelte';
     import RatingBadge from '../atoms/RatingBadge.svelte';
     import AvailabilityOverlay from '../atoms/AvailabilityOverlay.svelte';
+    import SmartImage from './SmartImage.svelte';
 
     export let item;
 
@@ -27,18 +28,6 @@
         cart.addItem(item);
     }
 
-    function getCategoryIcon(category) {
-        const icons = {
-            'combos': 'fas fa-star',
-            'sanduiches': 'fas fa-hamburger',
-            'kikao': 'fas fa-hotdog',
-            'bebidas': 'fas fa-wine-glass',
-            'porcoes': 'fas fa-drumstick-bite',
-            'pratos': 'fas fa-utensils'
-        };
-        return icons[category] || 'fas fa-utensils';
-    }
-
     function toggleReviews() {
         showReviews = !showReviews;
     }
@@ -47,9 +36,7 @@
 <div class="menu-item-container">
     <div class="menu-item" class:popular={item.popular} class:unavailable={item.isAvailable === false}>
         <div class="item-image">
-            <div class="image-placeholder" aria-hidden="true">
-                <i class={getCategoryIcon(item.category)}></i>
-            </div>
+            <SmartImage src={item.image} alt={item.name} />
             
             {#if item.popular}
                 <div class="popular-badge">
@@ -138,25 +125,11 @@
     .item-image {
         position: relative;
         width: 100%;
-        height: 200px;
+        height: 240px;
         overflow: hidden;
     }
 
-    .image-placeholder {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--gray-500);
-        font-size: 3rem;
-        transition: all 0.3s ease;
-    }
-
-    .menu-item:hover .image-placeholder {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-        color: var(--gray-700);
+    .menu-item:hover :global(img) {
         transform: scale(1.05);
     }
 

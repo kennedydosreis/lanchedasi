@@ -115,6 +115,12 @@
         background: var(--secondary-color);
         color: white;
         box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        view-transition-name: active-category;
+    }
+
+    :global(::view-transition-group(active-category)) {
+        animation-duration: 250ms;
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .category-item.active span {

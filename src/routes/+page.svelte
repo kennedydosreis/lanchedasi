@@ -1,7 +1,7 @@
 <script>
     import MetaTags from '$lib/components/MetaTags.svelte';
     import Hero from '$lib/components/Hero.svelte';
-    import MenuCategory from '$lib/components/Menu/MenuCategory.svelte';
+    import BentoMenu from '$lib/components/organisms/BentoMenu.svelte';
     import Contact from '$lib/components/Contact.svelte';
 
     export let data;
@@ -30,9 +30,8 @@
     <section id="populares" class="popular-section">
         <div class="container">
             <h2 class="section-title">⭐ Mais Pedidos</h2>
-            <MenuCategory
+            <BentoMenu
                 items={popularItems}
-                categoryId="populares"
             />
             
             <div class="cta-container">

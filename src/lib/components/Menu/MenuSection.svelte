@@ -1,5 +1,6 @@
 <script>
-    import MenuCategory from './MenuCategory.svelte';
+    import { onMount } from 'svelte';
+    import BentoMenu from '../organisms/BentoMenu.svelte';
     import CategoryBar from '../molecules/CategoryBar.svelte';
 
     export let menuData = null;
@@ -17,37 +18,32 @@
         { id: 'bebidas', title: '🥤 Bebidas', description: 'Refrescantes e geladas', tabLabel: 'Bebidas' }
     ];
 
-    function getPopularItems(data) {
-        const allItems = Object.values(data).flat();
-        return allItems.filter(item => item.popular);
-    }
-
     function handleTabClick(categoryId) {
-        activeTab = categoryId;
-        const menuElement = document.getElementById('menu-content');
-        if (menuElement) {
-            const offset = 140; 
-            const position = menuElement.getBoundingClientRect().top + window.pageYOffset - offset;
-            window.scrollTo({ top: position, behavior: 'smooth' });
+        if (!document.startViewTransition) {
+            activeTab = categoryId;
+            return;
         }
+
+        document.startViewTransition(() => {
+            activeTab = categoryId;
+        });
     }
 
-    $: popularItems = menuData ? getPopularItems(menuData) : [];
     $: categoriesWithItems = menuData ? categories.map(cat => ({
         ...cat,
         items: menuData[cat.id] || []
     })).filter(cat => cat.items.length > 0) : [];
     
-    $: visibleCategories = activeTab === 'all' 
-        ? categoriesWithItems 
-        : categoriesWithItems.filter(cat => cat.id === activeTab);
+    $: visibleItems = activeTab === 'all' 
+        ? Object.values(menuData || {}).flat()
+        : (menuData ? menuData[activeTab] || [] : []);
 </script>
 
 <section id="menu" class="menu-section" aria-label="Cardápio">
     <div class="container">
         <div class="section-header">
-            <h2 class="gradient-text">Nosso Cardápio</h2>
-            <p class="section-subtitle">Escolha seus pratos favoritos e monte seu pedido</p>
+            <h2 class="vanguard-title">Bento Revolution</h2>
+            <p class="section-subtitle">A nova era do sabor chegou. Navegue pela grade dinâmica.</p>
         </div>
 
         {#if loading}
@@ -55,40 +51,54 @@
         {:else if error}
             <div class="error-state"><p>Erro ao carregar cardápio.</p></div>
         {:else if menuData}
-            {#if popularItems.length > 0 && activeTab === 'all'}
-                <div class="popular-section">
-                    <h2 class="section-title">⭐ Mais Pedidos</h2>
-                    <MenuCategory items={popularItems} categoryId="populares" />
-                </div>
-            {/if}
-
             <CategoryBar {categories} {activeTab} onTabClick={handleTabClick} />
 
             <div class="menu-content" id="menu-content" role="tabpanel">
-                {#each visibleCategories as category}
-                    <MenuCategory
-                        title={category.title}
-                        items={category.items}
-                        categoryId={category.id}
-                        description={category.description}
-                    />
-                {/each}
+                <BentoMenu items={visibleItems} categoryId={activeTab} />
             </div>
         {/if}
     </div>
 </section>
 
 <style>
-    .menu-section { padding: var(--spacing-12) 0; background: var(--gray-50); }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-4); }
-    .section-header { text-align: center; margin-bottom: var(--spacing-12); }
-    .gradient-text { font-size: var(--font-size-4xl); font-weight: 800; background: linear-gradient(135deg, var(--secondary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: var(--spacing-4); }
-    .section-subtitle { font-size: var(--font-size-lg); color: var(--gray-600); max-width: 600px; margin: 0 auto; line-height: 1.6; }
-    .section-title { font-size: var(--font-size-3xl); font-weight: 800; color: var(--gray-900); margin-bottom: var(--spacing-8); text-align: center; }
-    .popular-section { margin-bottom: var(--spacing-12); background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); border-radius: 24px; padding: var(--spacing-8); }
-    .menu-content { padding-top: var(--spacing-8); min-height: 400px; }
+    .menu-section { padding: var(--spacing-12) 0; background: #fafafa; min-height: 100vh; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 var(--spacing-4); }
+    .section-header { text-align: left; margin-bottom: var(--spacing-12); }
+    
+    .vanguard-title { 
+        font-size: clamp(3rem, 10vw, 6rem); 
+        font-weight: 900; 
+        letter-spacing: -0.05em;
+        line-height: 0.9;
+        text-transform: uppercase;
+        background: linear-gradient(to right, var(--gray-900), var(--gray-400));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: var(--spacing-4);
+    }
+
+    .section-subtitle { 
+        font-size: var(--font-size-xl); 
+        color: var(--gray-600); 
+        max-width: 500px; 
+        line-height: 1.4;
+        font-weight: 500;
+    }
+
+    .menu-content { 
+        padding-top: var(--spacing-8); 
+        view-transition-name: bento-rearrange;
+    }
+    
+    :global(::view-transition-group(bento-rearrange)) {
+        animation-duration: 0.5s;
+        animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
     @media (max-width: 768px) {
-        .gradient-text { font-size: var(--font-size-3xl); }
-        .section-subtitle { font-size: var(--font-size-sm); }
+        .vanguard-title { font-size: 3rem; }
+        .section-header { text-align: center; }
+        .section-subtitle { margin: 0 auto; }
     }
 </style>
+
