@@ -1,7 +1,12 @@
 <script>
     import { cart } from '$lib/stores/cart.js';
+    import ReviewSection from '$lib/components/reviews/ReviewSection.svelte';
+    import { fade } from 'svelte/transition';
+    import { onMount } from 'svelte';
 
     export let item;
+
+    let showReviews = false;
 
     function addToCart() {
         cart.addItem(item);
@@ -25,36 +30,64 @@
         };
         return icons[category] || 'fas fa-utensils';
     }
+
+    function toggleReviews() {
+        showReviews = !showReviews;
+    }
 </script>
 
-<div class="menu-item" class:popular={item.popular}>
-    <!-- accessibility-fix: issue-19, issue-10 - Decorative icons aria-hidden -->
-    <div class="item-image">
-        <div class="image-placeholder" aria-hidden="true">
-            <i class={getCategoryIcon(item.category)}></i>
-        </div>
-        {#if item.popular}
-            <div class="popular-badge">
-                <i class="fas fa-fire" aria-hidden="true"></i>
-                Popular
+<div class="menu-item-container">
+    <div class="menu-item" class:popular={item.popular}>
+        <div class="item-image">
+            <div class="image-placeholder" aria-hidden="true">
+                <i class={getCategoryIcon(item.category)}></i>
             </div>
-        {/if}
-    </div>
-    <!-- /accessibility-fix -->
-    <div class="item-content">
-        <h3 class="item-name">{item.name}</h3>
-        <p class="item-description">{item.description}</p>
-        <div class="item-footer">
-            <span class="item-price">{formatPrice(item.price)}</span>
-            <button class="add-button" on:click={addToCart} aria-label="Adicionar {item.name} ao carrinho">
-                <i class="fas fa-plus" aria-hidden="true"></i>
-                Adicionar
+            {#if item.popular}
+                <div class="popular-badge">
+                    <i class="fas fa-fire" aria-hidden="true"></i>
+                    Popular
+                </div>
+            {/if}
+            <button 
+                class="review-toggle-btn" 
+                on:click={toggleReviews}
+                aria-label="Ver avaliações de {item.name}"
+                title="Ver avaliações"
+            >
+                <i class="fas fa-comment-dots"></i>
             </button>
         </div>
+        <div class="item-content">
+            <h3 class="item-name">{item.name}</h3>
+            <p class="item-description">{item.description}</p>
+            <div class="item-footer">
+                <span class="item-price">{formatPrice(item.price)}</span>
+                <button class="add-button" on:click={addToCart} aria-label="Adicionar {item.name} ao carrinho">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    Adicionar
+                </button>
+            </div>
+        </div>
     </div>
+
+    {#if showReviews}
+        <div class="reviews-dropdown" transition:fade>
+            <div class="dropdown-header">
+                <button on:click={toggleReviews} class="close-btn">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+            <ReviewSection itemId={item.id} itemName={item.name} />
+        </div>
+    {/if}
 </div>
 
 <style>
+    .menu-item-container {
+        position: relative;
+        height: 100%;
+    }
+
     .menu-item {
         background: var(--white);
         border-radius: 20px;
@@ -116,7 +149,30 @@
         align-items: center;
         gap: var(--spacing-1);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        animation: pulse 2s infinite;
+    }
+
+    .review-toggle-btn {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--gray-700);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+    }
+
+    .review-toggle-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.1);
     }
 
     .item-content {
@@ -181,19 +237,34 @@
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
     }
 
-    .add-button i {
-        font-size: var(--font-size-xs);
+    .reviews-dropdown {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100%;
+        z-index: 50;
+        background: white;
+        border-radius: 20px;
+        padding: var(--spacing-6);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        overflow-y: auto;
     }
 
-    @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-        50% {
-            transform: scale(1.05);
-            opacity: 0.9;
-        }
+    .dropdown-header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: var(--spacing-4);
+    }
+
+    .close-btn {
+        background: var(--gray-100);
+        border: none;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
+        color: var(--gray-600);
     }
 
     @media (max-width: 768px) {
@@ -209,10 +280,6 @@
 
         .item-image {
             height: 160px;
-        }
-
-        .image-placeholder {
-            font-size: 2.5rem;
         }
     }
 </style>
