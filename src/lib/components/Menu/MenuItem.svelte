@@ -4,6 +4,11 @@
     import { ReviewRepository } from '$lib/repositories/ReviewRepository';
     import { fade } from 'svelte/transition';
     import { onMount } from 'svelte';
+    
+    // Atoms
+    import PriceTag from '../atoms/PriceTag.svelte';
+    import RatingBadge from '../atoms/RatingBadge.svelte';
+    import AvailabilityOverlay from '../atoms/AvailabilityOverlay.svelte';
 
     export let item;
 
@@ -20,13 +25,6 @@
 
     function addToCart() {
         cart.addItem(item);
-    }
-
-    function formatPrice(price) {
-        return price.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL'
-        });
     }
 
     function getCategoryIcon(category) {
@@ -52,17 +50,16 @@
             <div class="image-placeholder" aria-hidden="true">
                 <i class={getCategoryIcon(item.category)}></i>
             </div>
+            
             {#if item.popular}
                 <div class="popular-badge">
                     <i class="fas fa-fire" aria-hidden="true"></i>
                     Popular
                 </div>
             {/if}
-            {#if item.isAvailable === false}
-                <div class="unavailable-badge">
-                    Esgotado
-                </div>
-            {/if}
+
+            <AvailabilityOverlay isAvailable={item.isAvailable} />
+
             <button 
                 class="review-toggle-btn" 
                 on:click={toggleReviews}
@@ -75,16 +72,11 @@
         <div class="item-content">
             <div class="item-header">
                 <h3 class="item-name">{item.name}</h3>
-                {#if averageRating}
-                    <div class="item-rating">
-                        <i class="fas fa-star"></i>
-                        <span>{averageRating}</span>
-                    </div>
-                {/if}
+                <RatingBadge rating={averageRating} />
             </div>
             <p class="item-description">{item.description}</p>
             <div class="item-footer">
-                <span class="item-price">{formatPrice(item.price)}</span>
+                <PriceTag price={item.price} />
                 <button 
                     class="add-button" 
                     on:click={addToCart} 
@@ -143,19 +135,6 @@
         filter: grayscale(0.5);
     }
 
-    .unavailable-badge {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        background: var(--gray-600);
-        color: var(--white);
-        padding: var(--spacing-1) var(--spacing-3);
-        border-radius: 20px;
-        font-size: var(--font-size-xs);
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
     .item-image {
         position: relative;
         width: 100%;
@@ -195,6 +174,7 @@
         align-items: center;
         gap: var(--spacing-1);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        z-index: 5;
     }
 
     .review-toggle-btn {
@@ -213,6 +193,7 @@
         cursor: pointer;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         transition: all 0.2s;
+        z-index: 5;
     }
 
     .review-toggle-btn:hover {
@@ -245,23 +226,6 @@
         flex: 1;
     }
 
-    .item-rating {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        background: #fff8e6;
-        color: #b45309;
-        padding: 2px 8px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 700;
-    }
-
-    .item-rating i {
-        font-size: 10px;
-        color: #f59e0b;
-    }
-
     .item-description {
         color: var(--gray-600);
         line-height: 1.5;
@@ -278,12 +242,6 @@
         gap: var(--spacing-4);
         padding-top: var(--spacing-4);
         border-top: 1px solid var(--gray-100);
-    }
-
-    .item-price {
-        font-size: var(--font-size-xl);
-        font-weight: 700;
-        color: var(--secondary-color);
     }
 
     .add-button {
