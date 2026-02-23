@@ -6,7 +6,7 @@ export class GitHubService {
      */
     static async updateMenu(newProduct, token) {
         const repo = 'kennedydosreis/lanchedasi';
-        const path = 'src/lib/data/menu.json'; // Ajustado para o caminho real dos dados
+        const path = 'static/data/menu.json'; // Corrigido para o caminho correto onde o site lê os dados
 
         try {
             // 1. Buscar o arquivo atual e seu SHA (necessário para update)
