@@ -5,6 +5,7 @@
     import WhatsAppFloat from '$lib/components/WhatsAppFloat.svelte';
     import LoggerService from '$lib/services/LoggerService';
     import { onMount } from 'svelte';
+    import { page } from '$app/stores';
     import '../app.css';
 
     onMount(() => {
@@ -27,6 +28,46 @@
 
         LoggerService.info('App layout mounted successfully');
     });
+
+    // SEO Structured Data (JSON-LD)
+    $: structuredData = {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": "Lanche da Si",
+        "image": "https://www.lanchedasi.com.br/assets/logo.png",
+        "@id": "https://www.lanchedasi.com.br",
+        "url": "https://www.lanchedasi.com.br",
+        "telephone": "+5592984570146",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rua das Lanchonetes, 123",
+            "addressLocality": "Manaus",
+            "addressRegion": "AM",
+            "postalCode": "69000-000",
+            "addressCountry": "BR"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": -3.1190275,
+            "longitude": -60.0217314
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            ],
+            "opens": "18:00",
+            "closes": "23:59"
+        },
+        "servesCuisine": "Fast Food, Brazilian",
+        "priceRange": "$$"
+    };
 </script>
 
 <svelte:head>
@@ -41,6 +82,9 @@
 
     <!-- Inter font with display=swap for fast text rendering -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- SEO JSON-LD -->
+    {@html `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`}
 </svelte:head>
 
 <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
