@@ -1,6 +1,5 @@
 import { get } from 'svelte/store';
 import { cart } from '../stores/cart';
-import { orderInfo } from '../stores/orderInfo';
 import { z } from 'zod';
 import LoggerService from './LoggerService';
 
@@ -16,6 +15,26 @@ export const OrderSchema = z.object({
 });
 
 export class CheckoutService {
+    /**
+     * Gera uma chave de idempotência para o pedido
+     * Baseada no conteúdo do carrinho e timestamp (minuto atual)
+     */
+    static generateIdempotencyKey(customer, items) {
+        const payload = JSON.stringify({
+            phone: customer.phone,
+            items: items.map(i => ({ id: i.id, q: i.quantity })),
+            minute: Math.floor(Date.now() / 60000) // Válida por 1 minuto
+        });
+        
+        // Simples hash para string (substituindo crypto para compatibilidade total)
+        let hash = 0;
+        for (let i = 0; i < payload.length; i++) {
+            hash = ((hash << 5) - hash) + payload.charCodeAt(i);
+            hash |= 0;
+        }
+        return `order_${Math.abs(hash)}_${Math.floor(Date.now() / 60000)}`;
+    }
+
     /**
      * Salva as informações do cliente no localStorage
      */
@@ -64,7 +83,10 @@ export class CheckoutService {
         
         message += `\n*Itens:*\n`;
         items.forEach(item => {
-            message += `- ${item.quantity}x ${item.nome} (R$ ${item.preco.toFixed(2)})\n`;
+            // Suporte a nome/nome e preco/price para compatibilidade de transição
+            const name = item.name || item.nome;
+            const price = item.price || item.preco;
+            message += `- ${item.quantity}x ${name} (R$ ${price.toFixed(2)})\n`;
         });
 
         message += `\n*Total: R$ ${total.toFixed(2)}*`;
@@ -76,9 +98,23 @@ export class CheckoutService {
      * Finaliza o pedido e redireciona para o WhatsApp
      */
     static async processOrder(customerData) {
+        const currentCart = get(cart);
+        const idempotencyKey = this.generateIdempotencyKey(customerData, currentCart);
+
+        // Proteção contra cliques duplos (debounce básico via storage)
+        if (typeof window !== 'undefined') {
+            const lastKey = sessionStorage.getItem('last_order_key');
+            if (lastKey === idempotencyKey) {
+                LoggerService.warn('Tentativa de pedido duplicado bloqueada (Idempotência)', { key: idempotencyKey });
+                throw new Error("Este pedido já está sendo processado. Verifique seu WhatsApp.");
+            }
+            sessionStorage.setItem('last_order_key', idempotencyKey);
+        }
+
         LoggerService.info('Iniciando processamento de pedido', { 
-            itemsCount: get(cart).length,
-            paymentMethod: customerData.paymentMethod 
+            itemsCount: currentCart.length,
+            paymentMethod: customerData.paymentMethod,
+            key: idempotencyKey
         });
 
         // 1. Validar dados
@@ -93,8 +129,10 @@ export class CheckoutService {
         }
 
         // 2. Coletar dados do carrinho
-        const currentCart = get(cart);
-        const total = currentCart.reduce((sum, item) => sum + (item.preco * item.quantity), 0);
+        const total = currentCart.reduce((sum, item) => {
+            const price = item.price || item.preco;
+            return sum + (price * item.quantity);
+        }, 0);
 
         if (currentCart.length === 0) {
             LoggerService.error('Tentativa de checkout com carrinho vazio');
