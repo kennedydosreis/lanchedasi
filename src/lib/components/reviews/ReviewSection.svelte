@@ -8,11 +8,7 @@
 
     let reviews = [];
     let loading = true;
-    let newReview = {
-        author: '',
-        rating: 5,
-        comment: 'Avaliação por estrelas' // Comentário padrão automático
-    };
+    let newRating = 5;
     let isSubmitting = false;
     let errorMessage = '';
 
@@ -31,113 +27,79 @@
         }
     }
 
-    async function handleSubmit() {
+    $: averageRating = reviews.length > 0 
+        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+        : null;
+
+    async function submitRating(rating) {
+        if (isSubmitting) return;
+        newRating = rating;
         isSubmitting = true;
         errorMessage = '';
         try {
             await ReviewRepository.addReview({
-                ...newReview,
+                author: 'Cliente',
+                rating: newRating,
+                comment: 'Avaliação iFood style',
                 itemId
             });
-            newReview = { author: '', rating: 5, comment: 'Avaliação por estrelas' };
             await loadReviews();
-            LoggerService.info('Review added successfully', { itemId });
+            LoggerService.info('Rating added successfully', { itemId, rating });
         } catch (e) {
-            errorMessage = e.errors?.[0]?.message || 'Erro ao enviar avaliação. Verifique os campos.';
-            LoggerService.warn('Review validation failed', { itemId, errors: e.errors });
+            errorMessage = 'Erro ao avaliar.';
+            LoggerService.warn('Rating failed', { itemId, error: e.message });
         } finally {
             isSubmitting = false;
         }
     }
 </script>
 
-<section class="mt-12 border-t pt-8" aria-labelledby="reviews-title">
-    <h2 id="reviews-title" class="text-2xl font-bold mb-6 text-gray-800 text-center">Avaliações do {itemName}</h2>
-
-    <div class="max-w-2xl mx-auto space-y-8">
-        <!-- Form Simples -->
-        <div class="bg-orange-50 p-6 rounded-2xl shadow-sm border border-orange-100">
-            <h3 class="text-lg font-bold mb-4 text-orange-800 text-center">Deixe sua nota</h3>
-            
-            <form on:submit|preventDefault={handleSubmit} class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="author" class="block text-xs font-bold text-orange-700 mb-1 uppercase tracking-wider">Seu Nome</label>
-                        <input 
-                            type="text" 
-                            id="author" 
-                            bind:value={newReview.author}
-                            class="w-full px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-orange-500 text-sm shadow-inner"
-                            placeholder="Nome"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label for="rating" class="block text-xs font-bold text-orange-700 mb-1 uppercase tracking-wider">Sua Nota</label>
-                        <select 
-                            id="rating" 
-                            bind:value={newReview.rating}
-                            class="w-full px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-orange-500 text-sm shadow-inner appearance-none bg-white"
-                        >
-                            <option value={5}>⭐⭐⭐⭐⭐ (Excelente)</option>
-                            <option value={4}>⭐⭐⭐⭐ (Muito Bom)</option>
-                            <option value={3}>⭐⭐⭐ (Bom)</option>
-                            <option value={2}>⭐⭐ (Regular)</option>
-                            <option value={1}>⭐ (Pode Melhorar)</option>
-                        </select>
-                    </div>
+<div class="rating-container py-4 border-t border-gray-100">
+    {#if loading}
+        <div class="h-6 w-24 bg-gray-100 animate-pulse rounded"></div>
+    {:else}
+        <div class="flex items-center justify-between gap-4">
+            <!-- Resumo iFood Style -->
+            <div class="flex items-center gap-2">
+                <div class="flex items-center text-yellow-500 font-bold">
+                    <i class="fas fa-star mr-1 text-sm"></i>
+                    <span class="text-sm">{averageRating || 'Novo!'}</span>
                 </div>
-
-                {#if errorMessage}
-                    <p class="text-red-600 text-xs bg-red-50 p-2 rounded text-center">{errorMessage}</p>
+                {#if reviews.length > 0}
+                    <span class="text-gray-400 text-xs">•</span>
+                    <span class="text-gray-500 text-xs">{reviews.length} {reviews.length === 1 ? 'avaliação' : 'avaliações'}</span>
                 {/if}
+            </div>
 
-                <button 
-                    type="submit" 
-                    disabled={isSubmitting}
-                    class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50"
-                >
-                    {isSubmitting ? 'Enviando...' : 'Avaliar agora'}
-                </button>
-            </form>
+            <!-- Botões de Ação Rápida -->
+            <div class="flex items-center gap-1">
+                {#if isSubmitting}
+                    <span class="text-[10px] text-gray-400 animate-pulse">Enviando...</span>
+                {:else}
+                    <span class="text-[10px] text-gray-400 mr-2 uppercase font-bold tracking-tight">Avaliar:</span>
+                    <div class="flex gap-1">
+                        {#each [1, 2, 3, 4, 5] as star}
+                            <button 
+                                on:click={() => submitRating(star)}
+                                class="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 border {newRating === star ? 'bg-yellow-50 border-yellow-200 text-yellow-600' : 'bg-white border-gray-100 text-gray-300'}"
+                                aria-label="Avaliar com {star} estrelas"
+                            >
+                                <i class="fas fa-star text-[10px]"></i>
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
         </div>
 
-        <!-- List -->
-        <div class="space-y-4">
-            {#if loading}
-                <div class="flex justify-center py-8">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                </div>
-            {:else if reviews.length === 0}
-                <div class="p-6 text-center">
-                    <p class="text-gray-400 italic">Nenhuma avaliação ainda. Seja o primeiro!</p>
-                </div>
-            {:else}
-                <div class="grid grid-cols-1 gap-3">
-                    {#each reviews as review}
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold uppercase text-xs">
-                                    {review.author.substring(0, 2)}
-                                </div>
-                                <div>
-                                    <span class="font-bold text-gray-800 block leading-tight">{review.author}</span>
-                                    <span class="text-[10px] text-gray-400 uppercase font-medium tracking-tighter">
-                                        {new Date(review.timestamp).toLocaleDateString('pt-BR')}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="flex text-yellow-400 text-xs gap-0.5">
-                                {#each Array(5) as _, i}
-                                    <i class="fas fa-star {i < review.rating ? '' : 'text-gray-200'}"></i>
-                                {/each}
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
-        </div>
-    </div>
-</section>
+        {#if errorMessage}
+            <p class="text-red-500 text-[10px] mt-1 text-right">{errorMessage}</p>
+        {/if}
+     neighborhood </div>
+{/if}
+
+<style>
+    .rating-container {
+        user-select: none;
+    }
+</style>
