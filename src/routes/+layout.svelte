@@ -11,6 +11,14 @@
 
     onMount(() => {
         cart.init();
+        
+        // Glow Tracker: Global CSS variables for cursor tracking
+        const handleMouseMove = (e) => {
+            document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
+            document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
+        };
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
         window.onerror = (message, source, lineno, colno, error) => {
             LoggerService.error('Global Client Error', {
                 message,

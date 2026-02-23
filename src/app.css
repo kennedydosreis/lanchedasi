@@ -109,6 +109,26 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
+    /* Glow Tracker base variables */
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+}
+
+/* Fallback para View Transitions API e Grid */
+@supports not (view-transition-name: root) {
+    * {
+        transition: opacity 0.3s ease-in-out;
+    }
+}
+
+@supports not (display: grid) {
+    .bento-footer {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .footer-card {
+        flex: 1 1 300px;
+    }
 }
 
 a {

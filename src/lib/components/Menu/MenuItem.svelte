@@ -38,6 +38,11 @@
         <div class="item-image">
             <SmartImage src={item.image} alt={item.name} />
             
+            <div class="glass-overlays">
+                <PriceTag price={item.price} glass={true} />
+                <RatingBadge rating={averageRating} glass={true} />
+            </div>
+
             {#if item.popular}
                 <div class="popular-badge">
                     <i class="fas fa-fire" aria-hidden="true"></i>
@@ -59,11 +64,10 @@
         <div class="item-content">
             <div class="item-header">
                 <h3 class="item-name">{item.name}</h3>
-                <RatingBadge rating={averageRating} />
             </div>
             <p class="item-description">{item.description}</p>
             <div class="item-footer">
-                <PriceTag price={item.price} />
+                <div class="price-placeholder"></div>
                 <button 
                     class="add-button" 
                     on:click={addToCart} 
@@ -127,6 +131,16 @@
         width: 100%;
         height: 240px;
         overflow: hidden;
+    }
+
+    .glass-overlays {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 10;
     }
 
     .menu-item:hover :global(img) {
