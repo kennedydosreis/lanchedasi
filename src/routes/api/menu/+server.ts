@@ -7,33 +7,31 @@ export const config = {
 
 export const GET = async () => {
   try {
-    // Simulando a base de dados do menu que existia anteriormente ou gerando uma estática resiliente
-    // Em um cenário de produção, isso viria de um CMS ou banco de dados
     const menuData = [
       {
-        id: '1',
-        name: 'X-Salada Especial',
-        description: 'Pão, carne artesanal, queijo, presunto, alface, tomate e maionese da casa.',
-        price: 18.00,
-        category: 'sanduiches',
+        id: "combo-4",
+        name: "Combo 4",
+        description: "4 X-Saladas + 1 Batata Frita P + 1 Refrigerante (Magistral ou Regente) 1,5L",
+        price: 45.0,
+        category: "combos",
         popular: true,
         available: true
       },
       {
-        id: '2',
-        name: 'Combo Casal',
-        description: '2 X-Bacon + Batata Média + Guaraná 1L.',
-        price: 45.00,
-        category: 'combos',
+        id: "kikao-2",
+        name: "Kikão Especial",
+        description: "Pão com molho, salsicha, batata palha, queijo ralado e mussarela derretida",
+        price: 10.0,
+        category: "kikao",
         popular: true,
         available: true
       },
       {
-        id: '3',
-        name: 'Kikão da Si',
-        description: 'Pão de leite, salsicha, molho especial, batata palha e queijo ralado.',
-        price: 12.00,
-        category: 'kikao',
+        id: "prato-1",
+        name: "Isca de Carne",
+        description: "Carne grelhada acompanhada de arroz, farofa e batata frita",
+        price: 17.0,
+        category: "pratos",
         popular: true,
         available: true
       }

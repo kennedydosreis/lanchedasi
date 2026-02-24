@@ -53,6 +53,7 @@ function createMenuStore() {
                 stale: false
             });
         } catch (err) {
+            console.error('Fetch error:', err);
             const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
             
             update(s => ({
