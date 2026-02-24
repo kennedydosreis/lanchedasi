@@ -1,4 +1,9 @@
 import { json } from '@sveltejs/kit';
+import * as Sentry from "@sentry/sveltekit";
+import pkg from "@logtail/js";
+const { Logtail } = pkg;
+
+const logtail = pkg.Logtail ? new pkg.Logtail(process.env.LOGTAIL_SOURCE_TOKEN || "fake-token") : { info: () => {}, error: () => {} };
 
 export const config = {
     runtime: 'edge'
@@ -9,17 +14,21 @@ export async function POST({ request }) {
     try {
         const data = await request.json();
         
-        // Geração de ID resiliente (NanoID alternativo simples)
+        // Geração de ID resiliente
         const timestamp = Date.now().toString(36);
         const randomStr = Math.random().toString(36).substring(2, 8);
         const orderId = `ORD-${timestamp}-${randomStr}`.toUpperCase();
 
-        // Simulação de log de intenção (Em Edge Runtime real, poderíamos usar KV ou Upstash)
-        console.info(`[HYBRID-VANGUARD] Intenção de compra capturada: ${orderId}`, {
-            items: data.items?.length,
+        const logData = {
+            orderId,
+            itemsCount: data.items?.length,
             total: data.total,
-            userAgent: request.headers.get('user-agent')
-        });
+            userAgent: request.headers.get('user-agent'),
+            vanguard: true
+        };
+
+        console.info(`[HYBRID-VANGUARD] Intenção de compra capturada: ${orderId}`, logData);
+        logtail.info(`Order captured: ${orderId}`, logData);
 
         return json({
             success: true,
@@ -29,6 +38,8 @@ export async function POST({ request }) {
         });
     } catch (error) {
         console.error('[HYBRID-VANGUARD] Falha no processamento:', error);
+        Sentry.captureException(error);
+        logtail.error(`Edge Processing Failure`, { error: error.message });
         return json({ success: false, error: 'Internal Edge Error' }, { status: 500 });
     }
 }
