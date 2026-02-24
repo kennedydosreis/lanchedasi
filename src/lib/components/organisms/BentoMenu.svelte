@@ -26,6 +26,13 @@
           style="grid-column: span {skeleton.colSpan}; grid-row: span {skeleton.rowSpan}"
         ></div>
       {/each}
+    {:else if $menuStore.error && $menuStore.data.length === 0}
+      <div class="error-container">
+        <div class="error-state">
+          <p>Erro ao carregar o menu: {$menuStore.error}</p>
+          <button on:click={() => menuStore.refresh()}>Tentar novamente</button>
+        </div>
+      </div>
     {:else}
       {#each $menuStore.data as item, i}
         <BentoCell
@@ -41,7 +48,7 @@
     {/if}
   </div>
 
-  {#if $menuStore.stale && !$menuStore.loading}
+  {#if $menuStore.stale && !$menuStore.loading && $menuStore.data.length > 0}
     <div class="stale-warning">
       Exibindo dados offline. Algumas informações podem estar desatualizadas.
     </div>
@@ -106,9 +113,41 @@
     font-size: 0.875rem;
   }
 
+  .error-container {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+
   .error-state {
     text-align: center;
-    padding: 3rem;
+    padding: 2rem;
+    background: var(--gray-100, #f7fafc);
+    border-radius: 16px;
+    border: 1px solid var(--gray-200, #edf2f7);
+    width: 100%;
+  }
+
+  .error-state p {
+    color: var(--gray-600, #718096);
+    margin-bottom: 1rem;
+  }
+
+  .error-state button {
+    background: var(--primary-color, #ff4757);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .error-state button:hover {
+    transform: scale(1.05);
   }
 
   .sr-only {
