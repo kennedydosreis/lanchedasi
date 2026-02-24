@@ -20,11 +20,12 @@ jobs:
           script: |
             mkdir -p ~/app
             cd ~/app
-            # Clonar ou atualizar o repositório na VPS
+            # Inicializar git se não existir para sincronizar
             if [ ! -d ".git" ]; then
-              git clone https://github.com/kennedydosreis/lanchedasi.git .
-            else
-              git pull origin main
+              git init
+              git remote add origin https://github.com/kennedydosreis/lanchedasi.git
             fi
+            git fetch origin main
+            git reset --hard origin/main
             # Subir o ecossistema
             docker compose up -d --build
