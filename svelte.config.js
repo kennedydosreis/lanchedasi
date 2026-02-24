@@ -7,7 +7,7 @@ const adapter = process.env.VERCEL ? adapterAuto() : adapterStatic({
     assets: 'build',
     fallback: '404.html',
     precompress: false,
-    strict: true
+    strict: false
 });
 
 /** @type {import('@sveltejs/kit').Config} */
