@@ -1,0 +1,32 @@
+{
+	"/": [
+		"src/routes/+page.js"
+	],
+	"/api/log": [
+		"src/routes/api/log/+server.js"
+	],
+	"/api/menu": [
+		"src/routes/api/menu/+server.ts"
+	],
+	"/api/order": [
+		"src/routes/api/order/+server.js"
+	],
+	"/cardapio": [
+		"src/routes/cardapio/+page.js"
+	],
+	"/contato": [
+		"src/routes/contato/+page.js"
+	],
+	"/gerenciar": [
+		"src/routes/gerenciar/+page.js"
+	],
+	"/robots.txt": [
+		"src/routes/robots.txt/+server.js"
+	],
+	"/sitemap.xml": [
+		"src/routes/sitemap.xml/+server.js"
+	],
+	"/sobre": [
+		"src/routes/sobre/+page.js"
+	]
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"hooks.server.js","sources":["../../../../src/hooks.server.js"],"sourcesContent":["import * as Sentry from \"@sentry/sveltekit\";\n\nSentry.init({\n  dsn: process.env.SENTRY_DSN || \"https://public@sentry.io/1\",\n  tracesSampleRate: 1.0,\n});\n"],"names":[],"mappings":";;;;;;;;;;;AAEA,OAAO,KAAK;AAAA,EACV,KAAK,QAAQ,IAAI,cAAc;AAAA,EAC/B,kBAAkB;AACpB,CAAC;"}

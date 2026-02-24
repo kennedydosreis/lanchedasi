@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="theme-color" content="#f59e0b" />
+	<link rel="icon" href="../logo-lanche-da-si.png" />
+	<link rel="apple-touch-icon" href="../logo-lanche-da-si.png" />
+	<link rel="manifest" href="../manifest.json" />
+	
+		<link rel="modulepreload" href="../_app/immutable/entry/start.CopS4xTZ.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/DcY6sxlp.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/JQPz_MRN.js">
+		<link rel="modulepreload" href="../_app/immutable/entry/app.DpnTbANT.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/BOFEw3tB.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/D9vLkFHD.js">
+		<link rel="modulepreload" href="../_app/immutable/chunks/DDWrEf_9.js">
+</head>
+
+<body data-sveltekit-preload-data="hover">
+	<div style="display: contents">
+			<script>
+				{
+					__sveltekit_b6p5fd = {
+						base: new URL("..", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("../_app/immutable/entry/start.CopS4xTZ.js"),
+						import("../_app/immutable/entry/app.DpnTbANT.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js').catch(() => {});
+			});
+		}
+	</script>
+</body>
+
+</html>
