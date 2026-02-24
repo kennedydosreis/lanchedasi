@@ -1,6 +1,6 @@
 <script>
-    import { cart } from '$lib/stores/cart.js';
-    import { orderInfo } from '$lib/stores/orderInfo.js';
+    import { cart } from '$lib/stores/cart';
+    import { orderInfo } from '$lib/stores/orderInfo';
     import { PriceService } from '$lib/services/PriceService';
     import CartItem from './CartItem.svelte';
     import CheckoutModal from '../Checkout/CheckoutModal.svelte';

@@ -1,9 +1,9 @@
 <script>
     import { onMount } from 'svelte';
-    import { CheckoutService } from '$lib/services/CheckoutService.js';
+    import { CheckoutService } from '$lib/services/CheckoutService';
     import { cart } from '$lib/stores/cart';
     import { validateCartForCheckout } from '$lib/utils/CartValidator.ts';
-    import { loadMenuData } from '$lib/utils/loadMenu.js';
+    import { loadMenuData } from '$lib/utils/loadMenu';
 
     export let cartItems = [];
     export let onClose = () => {};

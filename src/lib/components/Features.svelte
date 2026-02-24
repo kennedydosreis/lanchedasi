@@ -1,5 +1,5 @@
 <script>
-    import { orderInfo } from '$lib/stores/orderInfo.js';
+    import { orderInfo } from '$lib/stores/orderInfo';
 
     let showDemo = false;
     let demoObservations = '';

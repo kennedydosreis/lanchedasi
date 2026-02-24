@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { get } from 'svelte/store';
-import { cart } from './cart.js';
+import { cart } from './cart';
 import { 
     validateItem, 
     sanitizeQuantity, 

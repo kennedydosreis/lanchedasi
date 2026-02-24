@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { fade, fly } from 'svelte/transition';
-    import { cart } from '$lib/stores/cart.js';
+    import { cart } from '$lib/stores/cart';
     import PriceTag from '../atoms/PriceTag.svelte';
     import SmartImage from '../Menu/SmartImage.svelte';
     import AvailabilityOverlay from '../atoms/AvailabilityOverlay.svelte';

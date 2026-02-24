@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
     import { base } from '$app/paths';
-    import { loadMenuData } from '$lib/utils/loadMenu.js';
+    import { loadMenuData } from '$lib/utils/loadMenu';
 
     export let title = 'Lanche da Si - Os melhores lanches de Manaus | Delivery';
     export let description = 'Lanchonete em Manaus com delivery. Hambúrgueres, kikões, yakisoba, porções e mais. Peça pelo WhatsApp! Aberto de quarta a domingo, 18h às 23h.';

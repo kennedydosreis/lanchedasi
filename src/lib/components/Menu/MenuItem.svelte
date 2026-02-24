@@ -1,5 +1,5 @@
 <script>
-    import { cart } from '$lib/stores/cart.js';
+    import { cart } from '$lib/stores/cart';
     import ReviewSection from '$lib/components/reviews/ReviewSection.svelte';
     import { ReviewRepository } from '$lib/repositories/ReviewRepository';
     import { fade } from 'svelte/transition';

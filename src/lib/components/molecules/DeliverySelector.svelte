@@ -1,5 +1,5 @@
 <script>
-    import { orderInfo } from '$lib/stores/orderInfo.js';
+    import { orderInfo } from '$lib/stores/orderInfo';
     import { PriceService } from '$lib/services/PriceService';
 
     let showLocationError = false;
