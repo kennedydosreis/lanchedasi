@@ -32,12 +32,33 @@ function createMenuStore() {
         update(s => ({ ...s, loading: true, error: null }));
 
         try {
-            // Em um cenário real, aqui seria a chamada para a API de borda
-            // Simulando fetch com atraso
-            const response = await fetch('/api/menu');
+            // Em um site estático, buscamos o JSON estático em vez de uma API dinâmica
+            const response = await fetch('/data/menu.json');
             if (!response.ok) throw new Error('Falha ao buscar menu');
             
-            const data: MenuItem[] = await response.json();
+            const rawData = await response.json();
+            
+            // Mapear os dados do JSON para o formato do MenuItem
+            const allItems = [
+                ...(rawData.combos || []),
+                ...(rawData.sanduiches || []),
+                ...(rawData.kikao || []),
+                ...(rawData.porcoes || []),
+                ...(rawData.pratos || []),
+                ...(rawData.bebidas || [])
+            ];
+            
+            const data: MenuItem[] = allItems
+                .filter(item => item.popular)
+                .map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    description: item.description,
+                    price: item.price,
+                    category: item.category,
+                    image: item.image,
+                    available: item.isAvailable ?? true
+                }));
             
             if (browser) {
                 localStorage.setItem(CACHE_KEY, JSON.stringify({
@@ -60,7 +81,6 @@ function createMenuStore() {
                 ...s,
                 loading: false,
                 error: errorMessage,
-                // Se temos dados (do cache), marcamos como stale mas mantemos funcional
                 stale: s.data.length > 0
             }));
         }
