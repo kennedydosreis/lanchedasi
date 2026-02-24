@@ -1,0 +1,30 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            mkdir -p ~/app
+            cd ~/app
+            # Clonar ou atualizar o repositório na VPS
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/kennedydosreis/lanchedasi.git .
+            else
+              git pull origin main
+            fi
+            # Subir o ecossistema
+            docker compose up -d --build
