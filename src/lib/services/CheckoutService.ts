@@ -3,10 +3,8 @@ import { cart } from '../stores/cart';
 import { z } from 'zod';
 import LoggerService from './LoggerService';
 import { UserRepository } from '../repositories/UserRepository';
+import type { CustomerInfo, CartItem } from '$lib/types/models';
 
-/**
- * Esquema de validação para os dados do pedido
- */
 export const OrderSchema = z.object({
     name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
     phone: z.string().min(10, "Informe um telefone válido (DDD + Número)"),
@@ -16,18 +14,13 @@ export const OrderSchema = z.object({
 });
 
 export class CheckoutService {
-    /**
-     * Gera uma chave de idempotência para o pedido
-     * Baseada no conteúdo do carrinho e timestamp (minuto atual)
-     */
-    static generateIdempotencyKey(customer, items) {
+    static generateIdempotencyKey(customer: CustomerInfo, items: CartItem[]): string {
         const payload = JSON.stringify({
             phone: customer.phone,
             items: items.map(i => ({ id: i.id, q: i.quantity })),
-            minute: Math.floor(Date.now() / 60000) // Válida por 1 minuto
+            minute: Math.floor(Date.now() / 60000)
         });
         
-        // Simples hash para string (substituindo crypto para compatibilidade total)
         let hash = 0;
         for (let i = 0; i < payload.length; i++) {
             hash = ((hash << 5) - hash) + payload.charCodeAt(i);
@@ -36,24 +29,18 @@ export class CheckoutService {
         return `order_${Math.abs(hash)}_${Math.floor(Date.now() / 60000)}`;
     }
 
-    /**
-     * Salva as informações do cliente no localStorage
-     */
-    static saveCustomerInfo(info) {
+    static saveCustomerInfo(info: CustomerInfo): void {
         if (typeof window !== 'undefined') {
             try {
                 localStorage.setItem('customer_info', JSON.stringify(info));
                 LoggerService.info('Informações do cliente salvas no localStorage');
-            } catch (e) {
+            } catch (e: any) {
                 LoggerService.warn('Falha ao salvar info no localStorage', { error: e.message });
             }
         }
     }
 
-    /**
-     * Recupera as informações do cliente do localStorage
-     */
-    static loadCustomerInfo() {
+    static loadCustomerInfo(): CustomerInfo | null {
         if (typeof window !== 'undefined') {
             try {
                 const saved = localStorage.getItem('customer_info');
@@ -61,17 +48,14 @@ export class CheckoutService {
                     LoggerService.info('Informações do cliente recuperadas com sucesso');
                     return JSON.parse(saved);
                 }
-            } catch (e) {
+            } catch (e: any) {
                 LoggerService.warn('Falha ao ler info do localStorage', { error: e.message });
             }
         }
         return null;
     }
 
-    /**
-     * Formata a mensagem para o WhatsApp
-     */
-    static buildWhatsAppMessage(customer, items, total) {
+    static buildWhatsAppMessage(customer: CustomerInfo, items: CartItem[], total: number): string {
         let message = `*Novo Pedido - Lanche da Si*\n\n`;
         message += `*Cliente:* ${customer.name}\n`;
         message += `*Telefone:* ${customer.phone}\n`;
@@ -84,10 +68,7 @@ export class CheckoutService {
         
         message += `\n*Itens:*\n`;
         items.forEach(item => {
-            // Suporte a nome/nome e preco/price para compatibilidade de transição
-            const name = item.name || item.nome;
-            const price = item.price || item.preco;
-            message += `- ${item.quantity}x ${name} (R$ ${price.toFixed(2)})\n`;
+            message += `- ${item.quantity}x ${item.name} (R$ ${item.price.toFixed(2)})\n`;
         });
 
         message += `\n*Total: R$ ${total.toFixed(2)}*`;
@@ -95,14 +76,10 @@ export class CheckoutService {
         return encodeURIComponent(message);
     }
 
-    /**
-     * Finaliza o pedido e redireciona para o WhatsApp
-     */
-    static async processOrder(customerData) {
+    static async processOrder(customerData: CustomerInfo): Promise<string> {
         const currentCart = get(cart);
         const idempotencyKey = this.generateIdempotencyKey(customerData, currentCart);
 
-        // Proteção contra cliques duplos (debounce básico via storage)
         if (typeof window !== 'undefined') {
             const lastKey = sessionStorage.getItem('last_order_key');
             if (lastKey === idempotencyKey) {
@@ -118,7 +95,6 @@ export class CheckoutService {
             key: idempotencyKey
         });
 
-        // 1. Validar dados
         const validation = OrderSchema.safeParse(customerData);
         if (!validation.success) {
             const firstError = validation.error.errors[0];
@@ -129,47 +105,20 @@ export class CheckoutService {
             throw new Error(firstError.message);
         }
 
-        // 2. Coletar dados do carrinho
-        const total = currentCart.reduce((sum, item) => {
-            const price = item.price || item.preco;
-            return sum + (price * item.quantity);
-        }, 0);
+        const total = currentCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
         if (currentCart.length === 0) {
-            LoggerService.error('Tentativa de checkout com carrinho vazio');
+            LoggerService.error('Checkout com carrinho vazio');
             throw new Error("Seu carrinho está vazio!");
         }
 
-        // 3. Salvar info do cliente para próxima compra
         this.saveCustomerInfo(customerData);
-        UserRepository.saveUser({
-            name: customerData.name,
-            phone: customerData.phone
-        });
+        UserRepository.saveUser({ name: customerData.name, phone: customerData.phone });
 
-        // 4. Gerar link do WhatsApp
-        const phoneNumber = "5592991144080"; // Número real do Lanche da Si
+        const phoneNumber = "5592991144080";
         const message = this.buildWhatsAppMessage(customerData, currentCart, total);
         
-        const whatsappLink = `https://wa.me/${phoneNumber}?text=${message}`;
-        
-        // 5. Registro Assíncrono na Edge Function (Resiliência Vanguard)
-        try {
-            fetch('/api/order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    customer: { name: customerData.name, phone: customerData.phone },
-                    items: currentCart,
-                    total: total,
-                    idempotencyKey
-                })
-            }).catch(err => console.warn('Edge Log (non-blocking) failed:', err));
-        } catch (e) {
-            // Silencioso - não deve bloquear a experiência do usuário se a rede falhar
-        }
-
-        LoggerService.info('Pedido processado com sucesso, redirecionando para WhatsApp');
-        return whatsappLink;
+        LoggerService.info('Pedido processado com sucesso');
+        return `https://wa.me/${phoneNumber}?text=${message}`;
     }
 }

@@ -1,4 +1,4 @@
-import { sanitizeQuantity } from '$lib/utils/CartValidator.ts';
+import { sanitizeQuantity } from '$lib/utils/CartValidator';
 
 export class PriceService {
     /**

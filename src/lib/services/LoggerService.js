@@ -38,8 +38,16 @@ class LoggerService {
       console.log(`[${entry.level}] ${message}`, context);
     }
 
-    // Day 10: Here we would integrate with GA4/Sentry
-    // if (window.gtag) { ... }
+    // Day 13: Hybrid Vanguard Resilient Logging (Non-blocking Edge log)
+    if (level >= LOG_LEVELS.INFO && typeof window !== 'undefined') {
+        const isCritical = level >= LOG_LEVELS.WARN;
+        const logData = { ...entry, source: 'vanguard-client' };
+        
+        // Use background fetch or beacon for logging
+        if (navigator.sendBeacon && isCritical) {
+            navigator.sendBeacon('/api/log', JSON.stringify(logData));
+        }
+    }
   }
 
   static debug(message, context) { this._dispatch(LOG_LEVELS.DEBUG, message, context); }
