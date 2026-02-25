@@ -9,6 +9,7 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
-    host: true
+    host: true,
+    allowedHosts: ["www.lanchedasi.com.br", "lanchedasi.com.br"]
   }
 })
