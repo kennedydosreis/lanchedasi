@@ -3,8 +3,19 @@ import { CartProvider, useCart } from "./contexts/CartContext.jsx";
 import ProductCard from "./components/ProductCard.jsx";
 
 const Header = () => {
-  const { cartItems, total } = useCart();
+  const { cartItems, total, checkout } = useCart();
   const count = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  const handleCheckout = async () => {
+    if (count === 0) return alert("Carrinho vazio!");
+    if (!confirm("Confirmar pedido?")) return;
+    
+    setIsCheckingOut(true);
+    await checkout();
+    setIsCheckingOut(false);
+    alert("Pedido realizado com sucesso!");
+  };
 
   return (
     <header style={{ 
@@ -19,16 +30,20 @@ const Header = () => {
       <h1 style={{ margin: 0, fontSize: "1.5rem" }}>🍔 Lanchedasi</h1>
       <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
         <span style={{ fontWeight: "bold" }}>R$ {total.toFixed(2)}</span>
-        <button style={{ 
-          background: "white", 
-          color: "#e44", 
-          border: "none", 
-          padding: "5px 15px", 
-          borderRadius: "20px",
-          fontWeight: "bold",
-          cursor: "pointer"
-        }}>
-          🛒 {count}
+        <button 
+          onClick={handleCheckout}
+          disabled={isCheckingOut}
+          style={{ 
+            background: "white", 
+            color: "#e44", 
+            border: "none", 
+            padding: "5px 15px", 
+            borderRadius: "20px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            opacity: isCheckingOut ? 0.7 : 1
+          }}>
+          {isCheckingOut ? "Enviando..." : `🛒 ${count}`}
         </button>
       </div>
     </header>

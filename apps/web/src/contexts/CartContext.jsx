@@ -60,6 +60,17 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCartItems([]);
 
+  const checkout = async () => {
+    // Simulação de chamada API
+    console.log("Enviando pedido...", cartItems);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        clearCart();
+        resolve({ success: true, orderId: Math.floor(Math.random() * 1000) });
+      }, 1000);
+    });
+  };
+
   const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   return (
@@ -68,7 +79,8 @@ export const CartProvider = ({ children }) => {
       addToCart, 
       removeFromCart, 
       updateQuantity, 
-      clearCart, 
+      clearCart,
+      checkout,
       total 
     }}>
       {children}
