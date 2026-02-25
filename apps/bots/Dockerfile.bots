@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependências
+RUN pip install python-telegram-bot
+
+# Copiar script
+COPY setup_test.py .
+
+CMD ["python", "setup_test.py"]
